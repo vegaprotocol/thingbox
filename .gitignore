@@ -4,4 +4,6 @@ __pycache__
 build/
 dist/
 .vscode/
-thingbox.db
+*.db
+*.env
+!dev.env
