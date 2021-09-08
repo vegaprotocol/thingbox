@@ -11,9 +11,16 @@
 	let serverPublicKey
 	let adminToken
 
+	if (window.location.hash == '#logout') {
+		logout()
+	}
+
 	async function getApiData() {
 		try {
 			({ screenName, admin: isAdminUser } = await api.getUser())
+			if (isAdminUser && window.location.hash == '#admin') {
+				inAdminMode = true
+			}
 			if (screenName) {
 				localStorage.setItem('screen_name', screenName)
 			}
@@ -36,6 +43,7 @@
 
 	async function toggleAdminMode() {
 		inAdminMode = !inAdminMode
+		window.location.hash = inAdminMode ? '#admin' : '#'
 	}
 
 	async function generateAdminToken() {
@@ -59,9 +67,9 @@
 			<h1>Fairground incentives 🎡</h1>
 			{#if screenName} 
 				<p>	
-					<a on:click={logout} href="#logout">Log out @{screenName}</a>
+					<a on:click|preventDefault={logout} href="#logout">Log out @{screenName}</a>
 					{#if isAdminUser}
-					/ <a href="#toggle-admin" on:click={toggleAdminMode}>{inAdminMode ? 'home' : 'admin'}</a>
+					/ <a href={inAdminMode ? '#home' : '#admin'} on:click|preventDefault={toggleAdminMode}>{inAdminMode ? 'home' : 'admin'}</a>
 					{/if}
 				</p>
 			{/if}
