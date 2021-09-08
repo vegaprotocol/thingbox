@@ -6,7 +6,7 @@
 	let loaded = false
 	let items
 	let authUrl
-	let screenName
+	let screenName = localStorage.getItem('screen_name')
 	let isAdminUser
 	let inAdminMode
 	let serverPublicKey
@@ -15,6 +15,9 @@
 	async function getApiData() {
 		try {
 			({ screenName, admin: isAdminUser } = await api.getUser())
+			if (screenName) {
+				localStorage.setItem('screen_name', screenName)
+			}
 			items = await api.getItems()
 			serverPublicKey = await api.getPublicKey()
 			loaded = true
