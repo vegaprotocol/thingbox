@@ -74,9 +74,9 @@
 				<p>👉 <a href={authUrl}>Connect my Twitter account</a></p>
 			{/if}
 		</section>
-	{:else if items && !inAdminMode}
+	{:else if items !== undefined && !inAdminMode}
 		<Itemlist {items} />
-	{:else if items && inAdminMode}
+	{:else if items !== undefined && inAdminMode}
 		<Admin {serverPublicKey} {adminToken} {generateAdminToken} />
 	{/if}
 	<footer><section><p>&copy; 2021 Gobalsky Labs Ltd. Made with 💛 and 🦔 by the Vega project team.</p></section></footer>
