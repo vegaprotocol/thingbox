@@ -1,0 +1,54 @@
+@media (prefers-color-scheme: dark) {
+	:root {
+		--nc-d-tx-2: #f00;
+		--nc-tx-2: #bbb;
+		--nc-bg-2: #111;
+		--nc-bg-3: #222;
+	}
+}
+footer {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	border-top: 1px solid var(--nc-bg-3);
+	background: var(--nc-bg-2);
+	margin: 4rem calc(0px - (50vw - 50%)) 0;
+	padding: 1rem calc(50vw - 50%) 0;
+	width: 100%;
+}
+footer p {
+	max-width: 750px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 0 2rem;
+	font-size: 80%;
+}
+main {
+	padding-bottom: 4rem;
+}
+pre, code {
+	color: #2a2;
+}
+details pre {
+	padding: 0;
+	border: none;
+}
+article {
+	margin-top: 2rem;
+	padding: 4px 1rem;
+	border: 2px solid rgb(80, 80, 80);
+	background-color: rgb(20, 20, 20);
+}
+article h1 {
+	font-size: 1.8rem;
+	margin-bottom: 12px;
+	font-weight: normal;
+}
+article h2 {
+	font-size: 1.3rem;
+	font-weight: normal;
+}
+article h3 {
+	font-size: 1.4rem;
+	font-weight: normal;
+}
