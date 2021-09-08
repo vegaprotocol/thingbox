@@ -8,8 +8,8 @@ This is a simple front end built in Svelte for logging in and displaying items s
 Install the dependencies and launch a dev server (live reload):
 
 ```bash
-npm install
-npm run dev
+yarn
+yarn run dev
 ```
 
 
@@ -18,5 +18,5 @@ npm run dev
 To create an optimised version of the app:
 
 ```bash
-npm run build
+yarn run build
 ```
