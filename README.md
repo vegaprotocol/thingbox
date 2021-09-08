@@ -12,7 +12,8 @@ Assuming reload watching is in use either in the service definition or the app s
 ```bash
 git pull
 cd client
-npm run build
+yarn
+yarn run build
 cd ../server
 poetry install
 ```
