@@ -8,6 +8,7 @@ def server_url(server_base_url, path):
 	server_base_url = server_base_url if server_base_url[-1] != '/' else server_base_url[:-1]
 	return server_base_url + path
 
+
 def get_public_key(server_base_url):
 	res = requests.get(url=server_url(server_base_url, '/public-key'))
 	if res.status_code == 200:
