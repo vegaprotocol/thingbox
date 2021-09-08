@@ -67,14 +67,14 @@
 			{/if}
 		</nav>
 	</header>
-	{#if !loaded || authUrl}
+	{#if !loaded || !screenName || authUrl}
 		<section>
 			<p>Sign in with Twitter to access your Fairground incentives claim links. You must use the same Twitter account that you used to register with Vega Fairground.</p>
 			{#if authUrl}
 				<p>👉 <a href={authUrl}>Connect my Twitter account</a></p>
 			{/if}
 		</section>
-	{:else if !inAdminMode && screenName}
+	{:else if !inAdminMode}
 		<Itemlist {items} />
 	{:else if inAdminMode}
 		<Admin {serverPublicKey} {adminToken} {generateAdminToken} />
