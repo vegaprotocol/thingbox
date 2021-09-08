@@ -5,9 +5,9 @@ Stores and serves up markdown content to users by ID
 Check out README.md diles in `server` and `client` for more info.
 
 
-## updating everything on a running server (assuming reload watching is on)
+## Updating a running server
 
-SSH to the server and change to the project root directory, then:
+Assuming reload watching is in use either in the service definition or the app server (e.e. uvicorn), SSH to the server and change to the project root directory, then:
 
 ```bash
 git pull
