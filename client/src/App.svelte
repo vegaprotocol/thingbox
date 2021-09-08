@@ -3,7 +3,6 @@
 	import Itemlist from './ItemList.svelte'
 	import Admin from './Admin.svelte'
 
-	let loaded = false
 	let items
 	let authUrl
 	let screenName = localStorage.getItem('screen_name')
@@ -20,12 +19,10 @@
 			}
 			items = await api.getItems()
 			serverPublicKey = await api.getPublicKey()
-			loaded = true
 		}
 		catch (e) {
 			if (e.message === 'unauthorised') {
 				authUrl = await api.auth()	
-				loaded = true
 			}
 		}
 	}
@@ -70,7 +67,7 @@
 			{/if}
 		</nav>
 	</header>
-	{#if !loaded || !screenName || authUrl}
+	{#if !screenName || authUrl}
 		<section>
 			<p>Sign in with Twitter to access your Fairground incentives claim links. You must use the same Twitter account that you used to register with Vega Fairground.</p>
 			{#if authUrl}
