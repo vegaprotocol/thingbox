@@ -138,7 +138,7 @@ def get_items(session: UserSession=Depends(user_is_authenticated)):
 
 @app.get('/public-key')
 def get_public_key():
-	return dict(public_key_b58=b58encode(db.get_public_key()).decode())
+	return dict(public_key_b58=b58encode(db.get_public_key().encode()).decode())
 
 
 @app.get('/admin-token')
