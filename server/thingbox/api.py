@@ -112,15 +112,18 @@ def auth_begin():
 
 
 @app.get('/auth-complete')
-def auth_complete(token: str, oauth_verifier: str):
+def auth_complete(token: str, oauth_verifier: Optional[str] = None, denied: Optional[str] = None):
+	print(oauth_verifier)
+	print(denied)
 	if token in user_sessions: del user_sessions[token]
 	if token in auth_sessions:
 		auth = auth_sessions.pop(token)
-		auth.get_access_token(oauth_verifier)
-		api = tweepy.API(auth)
-		user = api.verify_credentials()
-		user_sessions[token] = UserSession(api=api, user=user)
-	return RedirectResponse(config.app_base_url)
+		if oauth_verifier and not denied:
+			auth.get_access_token(oauth_verifier)
+			api = tweepy.API(auth)
+			user = api.verify_credentials()
+			user_sessions[token] = UserSession(api=api, user=user)
+	return RedirectResponse(config.app_base_url + ('/#denied' if denied else ''))
 
 
 @app.get('/user')
