@@ -10,15 +10,21 @@
 	let inAdminMode
 	let serverPublicKey
 	let adminToken
+	let loginDenied
 
 	if (window.location.hash == '#logout') {
+		logout()
+	}
+
+	if (window.location.hash == '#denied') {
+		loginDenied = true
 		logout()
 	}
 
 	async function getApiData() {
 		try {
 			({ screenName, admin: isAdminUser } = await api.getUser())
-			if (isAdminUser && window.location.hash == '#admin') {
+			if (isAdminUser && window.location.hash === '#admin') {
 				inAdminMode = true
 			}
 			if (screenName) {
@@ -77,6 +83,9 @@
 	</header>
 	{#if !screenName || authUrl}
 		<section>
+			{#if loginDenied}
+				<p class="warning">Login failed or cancelled, try again.</p>
+			{/if}
 			<p>Sign in with Twitter to access your Fairground incentives claim links. You must use the same Twitter account that you used to register with Vega Fairground.</p>
 			{#if authUrl}
 				<p>👉 <a href={authUrl}>Connect my Twitter account</a></p>

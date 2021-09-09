@@ -5,6 +5,9 @@
 		--nc-bg-2: #111;
 		--nc-bg-3: #222;
 	}
+	.warning {
+		color: darkred;
+	}
 }
 footer {
 	position: fixed;
@@ -51,4 +54,7 @@ article h2 {
 article h3 {
 	font-size: 1.4rem;
 	font-weight: normal;
+}
+.warning {
+	color: red;
 }
