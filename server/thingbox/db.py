@@ -1,5 +1,4 @@
 import sqlite3
-from base58 import b58encode
 from base64 import b64decode
 from nacl.public import PrivateKey, SealedBox
 from threading import Lock
@@ -14,7 +13,7 @@ class DB:
 		self.ensure_schema()
 		private_key = PrivateKey(private_key_bytes)
 		self._crypto = SealedBox(private_key)
-		self._public_key = b58encode(private_key.public_key.encode()).decode('utf-8')
+		self._public_key = private_key.public_key
 
 	def ensure_schema(self):
 		with self._write_mutex, self._db as sql:
@@ -106,4 +105,4 @@ class DB:
 		return list(filter(lambda x: x is not None, items))
 
 	def get_public_key(self):
-		return dict(public_key_b58=self._public_key)
+		return self._public_key
