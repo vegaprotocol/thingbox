@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "thingbox"
-version = "0.1.0"
+version = "0.0.2"
 description = ""
 authors = ["Barney Mannerings <b.mannerings@gmail.com>"]
 
