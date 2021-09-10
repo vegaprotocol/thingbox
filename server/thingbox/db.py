@@ -40,6 +40,7 @@ class DB:
 					id TEXT NOT NULL PRIMARY KEY, 
 					admin_id INTEGER NOT NULL,
 					created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+					closed TIMESTAMP,
 					FOREIGN KEY (admin_id) REFERENCES admins (id)
 				)
 			""")
@@ -111,6 +112,12 @@ class DB:
 				""", dict(admin_id=admin, batch_id=batch))
 				if res.fetchone()[0] == 0: raise Exception(f'admin ({admin}) has no batch: {batch}')
 				return batch
+
+	def close_batch(self, batch):
+		with self._write_mutex, self._db as sql:
+			sql.execute("""
+				UPDATE batches SET closed = CURRENT_TIMESTAMP WHERE id = :batch_id
+			""", dict(batch_id=batch))
 		
 	def decrypt_data(self, ciphertext):
 		try:
