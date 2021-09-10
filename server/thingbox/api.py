@@ -1,9 +1,11 @@
+import json
 from os import urandom, environ
 from dataclasses import dataclass
 from typing import Optional
 
 import tweepy
-from cachetools import TTLCache
+import chevron
+from cachetools import TTLCache, LRUCache
 from base58 import b58encode, b58decode
 from pydantic import BaseModel, BaseSettings
 from fastapi import FastAPI, Depends, HTTPException
@@ -31,6 +33,8 @@ class Config(BaseSettings):
 	max_concurrent_sessions: int = 65536
 	max_admin_tokens: int = 32
 	token_length_bytes: int = 32
+	id_length_bytes: int = 16
+	template_cache_size: int = 64
 	static_files_path: Optional[str] = None
 
 	@property
@@ -46,13 +50,18 @@ app = FastAPI(
 	docs_url=None, redoc_url=None
 )
 
-db = DB(filepath=config.database_file, private_key_bytes=b58decode(config.private_key_b58))
+db = DB(
+	filepath=config.database_file,
+	private_key_bytes=b58decode(config.private_key_b58), 
+	id_len_bytes=config.id_length_bytes)
 
 app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_headers=['Authorization'])
 auth_scheme = OAuth2PasswordBearer(tokenUrl='auth')
+
 auth_sessions = TTLCache(maxsize=config.max_concurrent_auth_attempts, ttl=config.auth_timeout)
 user_sessions = TTLCache(maxsize=config.max_concurrent_sessions, ttl=config.session_ttl)
 admin_tokens = TTLCache(maxsize=config.max_admin_tokens, ttl=config.admin_ttl)
+template_cache = LRUCache(maxsize=config.template_cache_size)
 
 
 @dataclass
@@ -60,6 +69,7 @@ class UserSession:
 	api: tweepy.API
 	user: tweepy.User
 	admin_token: Optional[str] = None
+	admin_id: Optional[int] = None
 
 
 class AuthResponse(BaseModel):
@@ -70,11 +80,21 @@ class AuthResponse(BaseModel):
 class Item(BaseModel):
 	target_type: str
 	target_id: str
-	item_encrypted_b64: str
+	category: str
+	data_encrypted_b64: str
+	template: str
+	batch: str = None
 
 
 def make_token():
 	return b58encode(urandom(config.token_length_bytes)).decode('utf-8')
+
+
+def get_template_cached(template):
+	if template in template_cache: return template_cache[template]
+	if content := db.get_template(template):
+		template_cache[template] = content
+		return content
 
 
 def user_is_authenticated(token: str=Depends(auth_scheme)):
@@ -85,7 +105,8 @@ def user_is_authenticated(token: str=Depends(auth_scheme)):
 
 
 def authenticated_user_is_admin(session: UserSession=Depends(user_is_authenticated)):
-	if db.is_admin(user_type='twitter', user_id=session.user.id_str):
+	if (admin_id := db.is_admin(user_type='twitter', user_id=session.user.id_str)):
+		session.admin_id = admin_id
 		return session
 	else:
 		raise HTTPException(status_code=403)
@@ -93,7 +114,8 @@ def authenticated_user_is_admin(session: UserSession=Depends(user_is_authenticat
 
 def api_token_is_admin_token(token: str=Depends(auth_scheme)):
 	if (session := admin_tokens.get(token, None)) is not None:
-		if db.is_admin(user_type='twitter', user_id=session.user.id_str):
+		if (admin_id := db.is_admin(user_type='twitter', user_id=session.user.id_str)):
+			session.admin_id = admin_id
 			return session
 		else:
 			del admin_tokens[token]
@@ -113,8 +135,6 @@ def auth_begin():
 
 @app.get('/auth-complete')
 def auth_complete(token: str, oauth_verifier: Optional[str] = None, denied: Optional[str] = None):
-	print(oauth_verifier)
-	print(denied)
 	if token in user_sessions: del user_sessions[token]
 	if token in auth_sessions:
 		auth = auth_sessions.pop(token)
@@ -136,7 +156,19 @@ def get_items(session: UserSession=Depends(user_is_authenticated)):
 
 @app.get('/items')
 def get_items(session: UserSession=Depends(user_is_authenticated)):
-	return db.get_items('twitter', session.user.id_str)
+	result = db.get_items('twitter', session.user.id_str)
+	items = [
+		chevron.render(template=get_template_cached(r['template_id']), data=json.loads(r['data'])) 
+		for r in result if r['data'] is not None]
+	return items
+
+
+@app.post('/items')
+def post_item(item: Item, batch: Optional[str] = None, close_batch: Optional[bool] = True, session: UserSession=Depends(api_token_is_admin_token)):
+	if batch is None: batch = db.create_or_check_batch(admin=session.admin_id, batch=batch)
+	db.add_item(**{ **item.dict(), **dict(batch=batch) })
+	if close_batch: db.close_batch(batch)
+	return dict(batch=batch)
 
 
 @app.get('/public-key')
@@ -151,11 +183,6 @@ def get_admin_token(session: UserSession=Depends(authenticated_user_is_admin)):
 	session.admin_token = token
 	admin_tokens[token] = session
 	return dict(admin_token=token)
-
-
-@app.post('/items')
-def post_item(item: Item, session: UserSession=Depends(api_token_is_admin_token)):
-	db.add_item(**item.dict())
 
 
 if config.static_files_path:

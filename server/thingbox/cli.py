@@ -30,56 +30,78 @@ def encrypt(server, plaintext, plaintext_file):
 
 @cli.command(help="Encrypt and add an item for a given user ID")
 @global_options()
-@click.option('-t', '--target', nargs=2, type=str, required=True, help='Target, e.g.: --target twitter 44196397')
-@click.option('-p', '--plaintext', required=False, default=None)
-@click.argument('plaintext_file', type=click.File('rb'), required=False, default=sys.stdin)
-def add(server, auth_token, target, plaintext, plaintext_file):
-	target_type, target_id = target
-	if plaintext is None: plaintext = plaintext_file.read()
+@click.option(
+		'-u', '--target-user', 
+		nargs=2, type=str, required=True, 
+		help='Target user, e.g.: --target-user twitter 44196397')
+@click.option('-t', '--template', required=False, default=None, help='Template ID to render with')
+@click.option('-c', '--category', required=False, default=None, help='Item category metadata')
+@click.option('-d', '--data', required=False, default=None, help='Item data in plaintext JSON')
+@click.argument('data_file', type=click.File('rb'), required=False, default=sys.stdin)
+def add_item(server, auth_token, target_user, template, category, data, data_file):
+	target_type, target_id = target_user
+	if data is None: data = data_file.read()
 	result = client.add_item(
 		server_base_url=server, 
+		auth_token=auth_token, 
 		target_type=target_type, 
 		target_id=target_id, 
-		auth_token=auth_token, 
-		item_plaintext=plaintext)
+		category=category,
+		data_plaintext=data,
+		template_id=template)
 	click.echo(result)
 
 
 @cli.command(help="Encrypt and add multiple items from a file")
 @global_options()
-@click.option('-d', '--dry-run', required=False, default=False, is_flag=True, help='Print what would be sent to the server')
-@click.option('-t', '--target-type-field', required=False, default='target_type', help='Field containing target type')
+@click.option('-x', '--send', required=False, default=False, is_flag=True, help='Send to the server rather then logging')
+@click.option('-y', '--target-type-field', required=False, default='target_type', help='Field containing target type')
 @click.option('-i', '--target-id-field', required=False, default='target_id', help='Field containing target user ID')
-@click.option('-c', '--content-field', required=False, default='content', help='Field containing target user ID')
-@click.option('-f', '--template-file', required=False, default=None, help='File containing content template')
-@click.option('--target-type', required=False, default=None, help='Override target type for all items')
-@click.option('--target-id', required=False, default=None, help='Override target user ID for all items')
+@click.option('-c', '--category-field', required=False, default='content', help='Field containing item category')
+@click.option('-t', '--template-field', required=False, default=None, help='File containing content template ID')
+@click.option('--target-type', required=False, default=None, help='Set/override target type for all items')
+@click.option('--target-id', required=False, default=None, help='Set/override target user ID for all items')
+@click.option('--category', required=False, default=None, help='Set/override category for all items')
+@click.option('--template', required=False, default=None, help='Set/override template for all items')
 @click.argument('items_file', type=click.File('rb'), required=False, default=sys.stdin)
-def add_all(
+def import_items(
 		server, 
 		auth_token, 
 		target_type_field, 
 		target_id_field, 
-		content_field,
-		template_file, 
+		category_field,
+		template_field, 
 		target_type, 
 		target_id, 
+		category,
+		template,
 		items_file,
-		dry_run):
+		send):
 	items = json.load(items_file)
 	result = client.add_items(
 		server_base_url=server, 
-		auth_token=auth_token, 
-		items=items,
-		content_field=content_field,
-		template_file=template_file,
+		auth_token=auth_token,
 		target_type_field=target_type_field,
 		target_id_field=target_id_field,
+		category_field=category_field,
+		template_field=template_field,
 		override_target_type=target_type, 
 		override_target_id=target_id,
-		dry_run=dry_run,
+		override_category=category,
+		override_template_id=template,
+		items=items,
+		dry_run=not send,
 		log_fn=click.echo)
 	click.echo(result)
+
+
+@cli.command(help='Create an item rendering template')
+@global_options()
+@click.option('-n', '--name', nargs=1, type=str, required=True, help='Template name / ID')
+@click.option('-t', '--template', required=False, default=None)
+@click.argument('template_file', type=click.File('rb'), required=False, default=sys.stdin)
+def add_template(server, auth_token, name, plaintext, template_file):
+	pass
 
 
 if __name__ == '__main__':

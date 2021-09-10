@@ -1,7 +1,19 @@
 import requests
+import json
+from dataclasses import asdict, dataclass
 from base58 import b58decode
 from base64 import b64encode
 from nacl.public import SealedBox, PublicKey
+
+
+@dataclass
+class Item:
+	target_type: str
+	target_id: str
+	category: str
+	data_encrypted_b64: str
+	template: str
+	batch: str = None
 
 
 def server_url(server_base_url, path):
@@ -24,45 +36,71 @@ def encrypt(plaintext, public_key_b58):
 	return b64encode(ciphertext).decode('utf-8')
 
 
-def add_item(server_base_url, auth_token, target_type, target_id, item_plaintext):
+def add_item(
+		server_base_url, 
+		auth_token, 
+		target_type, 
+		target_id, 
+		category, 
+		data_plaintext, 
+		template_id, 
+		batch_id=None,
+		close_batch=True):
 	public_key = get_public_key(server_base_url)
-	item_encrypted_b64 = encrypt(item_plaintext, public_key)
+	data_encrypted_b64 = encrypt(data_plaintext, public_key)
+	item = Item(
+			target_type=target_type, 
+			target_id=target_id, 
+			category=category, 
+			data_encrypted_b64=data_encrypted_b64, 
+			template=template_id)
 	res = requests.post(
 		url=server_url(server_base_url, '/items'),
+		params=dict(batch=batch_id, close_batch=close_batch) if batch_id or not close_batch else None,
 		headers=dict(Authorization=f'Bearer {auth_token}'),
-		json=dict(target_type=target_type, target_id=target_id, item_encrypted_b64=item_encrypted_b64))
+		json=asdict(item))
 	if res.status_code == 200:
-		return 'item created'
+		batch_id = res.json()['batch']
+		return batch_id
 	else:
-		return f'error: {repr(res)}'
+		raise Exception(f'error: {repr(res)}')
 
 
 def add_items(
 		server_base_url, 
 		auth_token, 
 		items, 
-		content_field='content',
-		template_file=None,
 		target_type_field='target_type',
 		target_id_field='target_id',
+		category_field='category',
+		template_id_field='template',
 		override_target_type=None, 
 		override_target_id=None,
+		override_category=None,
+		override_template_id=None,
 		dry_run=False,
 		log_fn=print):
-	template = None
-	if template_file:
-		with open(template_file, 'r') as tf:
-			template = tf.read()
+	batch_id = None
 	for i, item in enumerate(items):
 		target_type = override_target_type or item[target_type_field] 
 		target_id = override_target_id or item[target_id_field]
-		if template:
-			content = template.format(**item)
-		else:
-			content = item[content_field]
+		category = override_category or item[category_field]
+		template_id = override_template_id or item[template_id_field]
 		if dry_run:
-			log_fn(f'#{i} [DRY_RUN]: {target_type} {target_id} = ')
-			log_fn(content)
+			log_fn(f'#{i} [DRY_RUN]: {repr(item)}')
 		else:
-			res = add_item(server_base_url, auth_token, target_type, target_id, content)
-			log_fn(f'#{i}: {res} for {target_type} {target_id}')
+			is_last_item = i == len(items) - 1
+			try:
+				batch_id = add_item(
+					server_base_url=server_base_url,
+					auth_token=auth_token, 
+					target_type=target_type, 
+					target_id=target_id, 
+					category=category,
+					data_plaintext=json.dumps(item),
+					template_id=template_id,
+					batch_id=batch_id,
+					close_batch=is_last_item)
+				log_fn(f'{batch_id}#{i}: CREATED {target_type} {target_id} ({category}: {template_id})')
+			except Exception as e:
+				log_fn(f'{batch_id or "????????"}#{i}: ERORR {target_type} {target_id} ({category}: {template_id}): {repr(e)}')
