@@ -1,11 +1,19 @@
 import requests
-import JSON
-from dataclasses import asdict
+import json
+from dataclasses import asdict, dataclass
 from base58 import b58decode
 from base64 import b64encode
 from nacl.public import SealedBox, PublicKey
 
-from thingbox.api import Item
+
+@dataclass
+class Item:
+	target_type: str
+	target_id: str
+	category: str
+	data_encrypted_b64: str
+	template: str
+	batch: str = None
 
 
 def server_url(server_base_url, path):
@@ -55,7 +63,7 @@ def add_item(
 		batch_id = res.json()['batch']
 		return batch_id
 	else:
-		raise(f'error: {repr(res)}')
+		raise Exception(f'error: {repr(res)}')
 
 
 def add_items(
@@ -89,7 +97,7 @@ def add_items(
 					target_type=target_type, 
 					target_id=target_id, 
 					category=category,
-					data_plaintext=JSON.dumps(item),
+					data_plaintext=json.dumps(item),
 					template_id=template_id,
 					batch_id=batch_id,
 					close_batch=is_last_item)

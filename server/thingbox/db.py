@@ -76,8 +76,8 @@ class DB:
 					AND user_id = :user_id 
 					AND active = TRUE
 			""", dict(user_type=user_type, user_id=user_id))
-			rows = res.fetchone()
-			return rows[0]['id'] if rows and len(rows) > 0 else None
+			row = res.fetchone()
+			return row['id'] if row else None
 
 	def make_admin(self, user_type, user_id):
 		with self._write_mutex, self._db as sql:
@@ -98,7 +98,7 @@ class DB:
 			with self._write_mutex, self._db as sql:
 				batch = self.generate_uid()
 				sql.execute("""
-					INSERT INTO batches (id, admin_id) VALUES (:id, :admin)
+					INSERT INTO batches (id, admin_id) VALUES (:id, :admin_id)
 				""", dict(id=batch, admin_id=admin))
 				return batch
 		else:
@@ -109,6 +109,7 @@ class DB:
 					WHERE
 						id = :batch_id
 						AND admin_id = :admin_id
+						AND closed IS NULL
 				""", dict(admin_id=admin, batch_id=batch))
 				if res.fetchone()[0] == 0: raise Exception(f'admin ({admin}) has no batch: {batch}')
 				return batch
@@ -129,7 +130,9 @@ class DB:
 		if self.decrypt_data(data_encrypted_b64) is None: return False
 		with self._write_mutex, self._db as sql:
 			sql.execute("""
-				INSERT INTO items (batch_id, target_type, target_id, item) VALUES (:batch_id, :target_type, :target_id, :item)
+				INSERT 
+					INTO items (batch_id, target_type, target_id, category, data, template_id) 
+					VALUES (:batch_id, :target_type, :target_id, :category, :data, :template_id)
 			""", dict(batch_id=batch, target_type=target_type, target_id=target_id, category=category, data=data_encrypted_b64, template_id=template))
 			return True
 	
@@ -155,10 +158,10 @@ class DB:
 				SELECT
 					content FROM templates
 				WHERE
-					template_id = :template_id
+					id = :template_id
 			""", dict(template_id=template))
 		rows = res.fetchone()
-		return rows[0]['content'] if len(rows) > 0 else None
+		return rows['content'] if len(rows) > 0 else None
 
 	def get_public_key(self):
 		return self._public_key

@@ -1,3 +1,4 @@
+import json
 from os import urandom, environ
 from dataclasses import dataclass
 from typing import Optional
@@ -134,8 +135,6 @@ def auth_begin():
 
 @app.get('/auth-complete')
 def auth_complete(token: str, oauth_verifier: Optional[str] = None, denied: Optional[str] = None):
-	print(oauth_verifier)
-	print(denied)
 	if token in user_sessions: del user_sessions[token]
 	if token in auth_sessions:
 		auth = auth_sessions.pop(token)
@@ -159,15 +158,15 @@ def get_items(session: UserSession=Depends(user_is_authenticated)):
 def get_items(session: UserSession=Depends(user_is_authenticated)):
 	result = db.get_items('twitter', session.user.id_str)
 	items = [
-		chevron.render(template=get_template_cached(r['template_id']), data=r['data']) 
+		chevron.render(template=get_template_cached(r['template_id']), data=json.loads(r['data'])) 
 		for r in result if r['data'] is not None]
 	return items
 
 
 @app.post('/items')
 def post_item(item: Item, batch: Optional[str] = None, close_batch: Optional[bool] = True, session: UserSession=Depends(api_token_is_admin_token)):
-	if batch is None: batch = db.create_or_check_batch(admin_id=session.admin_id, batch_id=batch)
-	db.add_item(**item.dict())
+	if batch is None: batch = db.create_or_check_batch(admin=session.admin_id, batch=batch)
+	db.add_item(**{ **item.dict(), **dict(batch=batch) })
 	if close_batch: db.close_batch(batch)
 	return dict(batch=batch)
 

@@ -36,18 +36,19 @@ def encrypt(server, plaintext, plaintext_file):
 		help='Target user, e.g.: --target-user twitter 44196397')
 @click.option('-t', '--template', required=False, default=None, help='Template ID to render with')
 @click.option('-c', '--category', required=False, default=None, help='Item category metadata')
-@click.option('-p', '--plaintext', required=False, default=None, help='Item data in plaintext JSON')
-@click.argument('plaintext_file', type=click.File('rb'), required=False, default=sys.stdin)
-def add_item(server, auth_token, target, plaintext, plaintext_file):
-	target_type, target_id = target
-	if plaintext is None: plaintext = plaintext_file.read()
+@click.option('-d', '--data', required=False, default=None, help='Item data in plaintext JSON')
+@click.argument('data_file', type=click.File('rb'), required=False, default=sys.stdin)
+def add_item(server, auth_token, target_user, template, category, data, data_file):
+	target_type, target_id = target_user
+	if data is None: data = data_file.read()
 	result = client.add_item(
 		server_base_url=server, 
 		auth_token=auth_token, 
 		target_type=target_type, 
 		target_id=target_id, 
-		data_plaintext=plaintext,
-		template_id=)
+		category=category,
+		data_plaintext=data,
+		template_id=template)
 	click.echo(result)
 
 
