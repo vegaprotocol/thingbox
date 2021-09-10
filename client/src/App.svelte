@@ -35,7 +35,7 @@
 		}
 		catch (e) {
 			if (e.message === 'unauthorised') {
-				localStorage.removeItem('scree_name')
+				localStorage.removeItem('screen_name')
 				screenName = null
 				authUrl = await api.auth()	
 			}
