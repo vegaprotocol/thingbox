@@ -67,7 +67,7 @@ def add_item(server, auth_token, target_user, template, category, data, data_fil
 @click.option('--category', required=False, default=None, help='Set/override category for all items')
 @click.option('--template', required=False, default=None, help='Set/override template for all items')
 @click.option('-g', '--global-data', required=False, default=[], nargs=2, multiple=True, help="Inject data all items, e.g. -g key value")
-@click.argument('items_file', type=click.File('rb'), required=False, default=sys.stdin)
+@click.argument('items_file', type=click.File('rb'), required=True, default=sys.stdin)
 def import_items(
 		server, 
 		auth_token, 

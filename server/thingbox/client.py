@@ -60,7 +60,7 @@ def add_item(
 		headers=dict(Authorization=f'Bearer {auth_token}'),
 		json=asdict(item))
 	if res.status_code == 200:
-		result = res.text
+		result = res.json()
 		return result
 	else:
 		raise Exception(f'error: {repr(res)}')
@@ -92,7 +92,7 @@ def add_items(
 		else:
 			is_last_item = i == len(items) - 1
 			try:
-				batch_id = add_item(
+				result = add_item(
 					server_base_url=server_base_url,
 					auth_token=auth_token, 
 					target_type=target_type, 
@@ -102,6 +102,7 @@ def add_items(
 					template_id=template_id,
 					batch_id=batch_id,
 					close_batch=is_last_item)
+				if result and 'batch' in result: batch_id = result['batch']
 				log_fn(f'{batch_id}#{i}: CREATED {target_type} {target_id} ({category}: {template_id})')
 			except Exception as e:
 				log_fn(f'{batch_id or "????????"}#{i}: ERORR {target_type} {target_id} ({category}: {template_id}): {repr(e)}')
