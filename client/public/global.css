@@ -8,6 +8,10 @@
 	.warning {
 		color: darkred;
 	}
+	article {
+		border: 2px solid rgb(80, 80, 80);
+		background-color: rgb(20, 20, 20);
+	}
 }
 footer {
 	position: fixed;
@@ -39,8 +43,8 @@ details pre {
 article {
 	margin-top: 2rem;
 	padding: 4px 1rem;
-	border: 2px solid rgb(80, 80, 80);
-	background-color: rgb(20, 20, 20);
+	border: 2px solid rgb(200, 200, 200);
+	background-color: rgb(245, 245, 245);
 }
 article h1 {
 	font-size: 1.8rem;
