@@ -17,6 +17,7 @@ aiofiles = "^0.7.0"
 click = "^8.0.1"
 requests = "^2.26.0"
 chevron = "^0.14.0"
+google-cloud-secret-manager = "^2.7.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

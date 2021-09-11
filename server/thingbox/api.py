@@ -45,6 +45,15 @@ class Config(BaseSettings):
 environment = environ.get('THINGBOX_ENV', 'dev')
 config = Config(_env_file=f'{environment}.env')
 
+if config.private_key_b58[:11] == 'gcp_secret:':
+	from google.cloud import secretmanager
+	client = secretmanager.SecretManagerServiceClient()
+	gcp_secret_name = config.private_key_b58[11:]
+	response = client.access_secret_version(name=gcp_secret_name)
+	config.private_key_b58 = response.payload.data.decode("UTF-8")
+	print('** Loaded private key from GCP secret **')
+
+
 app = FastAPI(
 	title=config.app_title, version=version,
 	docs_url=None, redoc_url=None
