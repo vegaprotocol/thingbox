@@ -82,13 +82,14 @@ def add_items(
 		dry_run=False,
 		log_fn=print):
 	batch_id = None
-	for i, item in enumerate(items):
-		target_type = override_target_type or item[target_type_field] 
-		target_id = override_target_id or item[target_id_field]
-		category = override_category or item[category_field]
-		template_id = override_template_id or item[template_id_field]
+	for i, item_data in enumerate(items):
+		target_type = override_target_type or item_data[target_type_field] 
+		target_id = override_target_id or item_data[target_id_field]
+		category = override_category or item_data[category_field]
+		template_id = override_template_id or item_data[template_id_field]
+		full_data = { **global_data, **item_data }
 		if dry_run:
-			log_fn(f'#{i} [DRY_RUN]: {target_type} {target_id} ({category}/{template_id}): {repr(item)}')
+			log_fn(f'#{i} [DRY_RUN]: {target_type} {target_id} ({category}/{template_id}): {repr(full_data)}')
 		else:
 			is_last_item = i == len(items) - 1
 			try:
@@ -98,7 +99,7 @@ def add_items(
 					target_type=target_type, 
 					target_id=target_id, 
 					category=category,
-					data_plaintext=json.dumps({ **global_data, **item }),
+					data_plaintext=json.dumps(full_data),
 					template_id=template_id,
 					batch_id=batch_id,
 					close_batch=is_last_item)
