@@ -71,3 +71,9 @@ details[open] summary .editlink {
 		background-color: rgb(20, 20, 20);
 	}
 }
+@media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
+  footer p {
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+  }
+}
