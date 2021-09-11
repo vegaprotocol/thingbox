@@ -120,7 +120,7 @@
 	{:else if items !== undefined && inAdminMode}
 		<Admin {serverPublicKey} {adminToken} {generateAdminToken} {clearTemplateCache} {templates} />
 	{/if}
-	<footer><section><p>&copy; 2021 Gobalsky Labs Ltd. Made with 💛 and 🦔 by the Vega project team.</p></section></footer>
+	<footer><section><p>&copy; 2021 Gobalsky Labs Ltd. Made with 💛 and 🦔 by the Vega project team. <a href="https://vega.xyz/privacy/">Privacy</a>.</p></section></footer>
 </main>
 
 <style>
