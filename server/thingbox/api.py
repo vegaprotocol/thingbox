@@ -138,7 +138,7 @@ def auth_begin():
 	token = make_token()
 	auth = tweepy.OAuthHandler(callback=f'{config.api_base_url}/auth-complete?token={token}', **config.twitter_api_credentials)
 	auth_sessions[token] = auth
-	url = auth.get_authorization_url(signin_with_twitter=True)
+	url = auth.get_authorization_url(signin_with_twitter=True) + '&force_login=true'
 	return AuthResponse(token=token, redirect_url=url)
 
 
