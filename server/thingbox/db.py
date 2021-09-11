@@ -13,6 +13,7 @@ class DB:
 		self._write_mutex = Lock()
 		self._db = sqlite3.connect(filepath, check_same_thread=False)
 		self._db.row_factory = sqlite3.Row
+		with self._db as sql: sql.execute('PRAGMA foreign_keys = ON')
 		self.ensure_schema()
 		private_key = PrivateKey(private_key_bytes)
 		self._crypto = SealedBox(private_key)
@@ -52,7 +53,7 @@ class DB:
 					target_id TEXT NOT NULL, 
 					category TEXT NOT NULL,
 					data TEXT NOT NULL,
-					template_id TEXT,
+					template_id TEXT NOT NULL,
 					created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 					archived BOOLEAN NOT NULL DEFAULT FALSE,
 					FOREIGN KEY (batch_id) REFERENCES batches (id),
@@ -129,12 +130,15 @@ class DB:
 	def add_item(self, batch, target_type, target_id, category, data_encrypted_b64, template):
 		if self.decrypt_data(data_encrypted_b64) is None: return False
 		with self._write_mutex, self._db as sql:
-			sql.execute("""
-				INSERT 
-					INTO items (batch_id, target_type, target_id, category, data, template_id) 
-					VALUES (:batch_id, :target_type, :target_id, :category, :data, :template_id)
-			""", dict(batch_id=batch, target_type=target_type, target_id=target_id, category=category, data=data_encrypted_b64, template_id=template))
-			return True
+			try:
+				sql.execute("""
+					INSERT 
+						INTO items (batch_id, target_type, target_id, category, data, template_id) 
+						VALUES (:batch_id, :target_type, :target_id, :category, :data, :template_id)
+				""", dict(batch_id=batch, target_type=target_type, target_id=target_id, category=category, data=data_encrypted_b64, template_id=template))
+				return True
+			except sqlite3.IntegrityError as e:
+				return False
 	
 	def get_items(self, target_type, target_id):
 		with self._db as sql:

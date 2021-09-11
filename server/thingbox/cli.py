@@ -34,22 +34,25 @@ def encrypt(server, plaintext, plaintext_file):
 		'-u', '--target-user', 
 		nargs=2, type=str, required=True, 
 		help='Target user, e.g.: --target-user twitter 44196397')
-@click.option('-t', '--template', required=False, default=None, help='Template ID to render with')
-@click.option('-c', '--category', required=False, default=None, help='Item category metadata')
+@click.option('-t', '--template', required=True, default=None, help='Template ID to render with')
+@click.option('-c', '--category', required=True, default=None, help='Item category metadata')
 @click.option('-d', '--data', required=False, default=None, help='Item data in plaintext JSON')
 @click.argument('data_file', type=click.File('rb'), required=False, default=sys.stdin)
 def add_item(server, auth_token, target_user, template, category, data, data_file):
 	target_type, target_id = target_user
 	if data is None: data = data_file.read()
-	result = client.add_item(
-		server_base_url=server, 
-		auth_token=auth_token, 
-		target_type=target_type, 
-		target_id=target_id, 
-		category=category,
-		data_plaintext=data,
-		template_id=template)
-	click.echo(result)
+	try:
+		result = client.add_item(
+			server_base_url=server, 
+			auth_token=auth_token, 
+			target_type=target_type, 
+			target_id=target_id, 
+			category=category,
+			data_plaintext=data,
+			template_id=template)
+		click.echo(result)
+	except Exception as e:
+		click.echo(e)
 
 
 @cli.command(help="Encrypt and add multiple items from a file")
@@ -63,6 +66,7 @@ def add_item(server, auth_token, target_user, template, category, data, data_fil
 @click.option('--target-id', required=False, default=None, help='Set/override target user ID for all items')
 @click.option('--category', required=False, default=None, help='Set/override category for all items')
 @click.option('--template', required=False, default=None, help='Set/override template for all items')
+@click.option('-g', '--global-data', required=False, default=[], nargs=2, multiple=True, help="Inject data all items, e.g. -g key value")
 @click.argument('items_file', type=click.File('rb'), required=False, default=sys.stdin)
 def import_items(
 		server, 
@@ -75,24 +79,29 @@ def import_items(
 		target_id, 
 		category,
 		template,
+		global_data,
 		items_file,
 		send):
+	global_data = { k: v for k, v in global_data }
 	items = json.load(items_file)
-	result = client.add_items(
-		server_base_url=server, 
-		auth_token=auth_token,
-		target_type_field=target_type_field,
-		target_id_field=target_id_field,
-		category_field=category_field,
-		template_field=template_field,
-		override_target_type=target_type, 
-		override_target_id=target_id,
-		override_category=category,
-		override_template_id=template,
-		items=items,
-		dry_run=not send,
-		log_fn=click.echo)
-	click.echo(result)
+	try:
+		client.add_items(
+			server_base_url=server, 
+			auth_token=auth_token,
+			target_type_field=target_type_field,
+			target_id_field=target_id_field,
+			category_field=category_field,
+			template_id_field=template_field,
+			override_target_type=target_type, 
+			override_target_id=target_id,
+			override_category=category,
+			override_template_id=template,
+			global_data=global_data,
+			items=items,
+			dry_run=not send,
+			log_fn=click.echo)
+	except Exception as e:
+		click.echo(e)
 
 
 @cli.command(help='Create an item rendering template')
@@ -100,7 +109,7 @@ def import_items(
 @click.option('-n', '--name', nargs=1, type=str, required=True, help='Template name / ID')
 @click.option('-t', '--template', required=False, default=None)
 @click.argument('template_file', type=click.File('rb'), required=False, default=sys.stdin)
-def add_template(server, auth_token, name, plaintext, template_file):
+def add_template(server, auth_token, name, template, template_file):
 	pass
 
 

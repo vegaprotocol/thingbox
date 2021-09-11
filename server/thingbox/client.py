@@ -60,8 +60,8 @@ def add_item(
 		headers=dict(Authorization=f'Bearer {auth_token}'),
 		json=asdict(item))
 	if res.status_code == 200:
-		batch_id = res.json()['batch']
-		return batch_id
+		result = res.text
+		return result
 	else:
 		raise Exception(f'error: {repr(res)}')
 
@@ -78,6 +78,7 @@ def add_items(
 		override_target_id=None,
 		override_category=None,
 		override_template_id=None,
+		global_data={},
 		dry_run=False,
 		log_fn=print):
 	batch_id = None
@@ -87,7 +88,7 @@ def add_items(
 		category = override_category or item[category_field]
 		template_id = override_template_id or item[template_id_field]
 		if dry_run:
-			log_fn(f'#{i} [DRY_RUN]: {repr(item)}')
+			log_fn(f'#{i} [DRY_RUN]: {target_type} {target_id} ({category}/{template_id}): {repr(item)}')
 		else:
 			is_last_item = i == len(items) - 1
 			try:
@@ -97,7 +98,7 @@ def add_items(
 					target_type=target_type, 
 					target_id=target_id, 
 					category=category,
-					data_plaintext=json.dumps(item),
+					data_plaintext=json.dumps({ **global_data, **item }),
 					template_id=template_id,
 					batch_id=batch_id,
 					close_batch=is_last_item)

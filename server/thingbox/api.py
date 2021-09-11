@@ -166,9 +166,9 @@ def get_items(session: UserSession=Depends(user_is_authenticated)):
 @app.post('/items')
 def post_item(item: Item, batch: Optional[str] = None, close_batch: Optional[bool] = True, session: UserSession=Depends(api_token_is_admin_token)):
 	if batch is None: batch = db.create_or_check_batch(admin=session.admin_id, batch=batch)
-	db.add_item(**{ **item.dict(), **dict(batch=batch) })
+	res = db.add_item(**{ **item.dict(), **dict(batch=batch) })
 	if close_batch: db.close_batch(batch)
-	return dict(batch=batch)
+	return dict(batch=batch, success=res)
 
 
 @app.get('/public-key')
