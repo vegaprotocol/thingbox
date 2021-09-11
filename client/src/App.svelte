@@ -53,6 +53,13 @@
 		items = null
 	}
 
+	async function switchAccount() {
+		await api.logout()
+		authUrl = await api.auth(true)
+		screenName = null
+		items = null
+	}
+
 	async function toggleAdminMode() {
 		inAdminMode = !inAdminMode
 		window.location.hash = inAdminMode ? '#admin' : '#'
@@ -90,7 +97,7 @@
 			<h1>Fairground incentives 🎡</h1>
 			{#if screenName} 
 				<p>	
-					<a on:click|preventDefault={logout} href="#logout">Log out @{screenName}</a>
+					<a on:click|preventDefault={logout} href="#logout">Log out @{screenName}</a> / <a href="#switch-account" on:click|preventDefault={switchAccount}>change account</a>
 					{#if isAdminUser}
 					/ <a href={inAdminMode ? '#home' : '#admin'} on:click|preventDefault={toggleAdminMode}>{inAdminMode ? 'home' : 'admin'}</a>
 					{/if}

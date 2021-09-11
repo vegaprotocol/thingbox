@@ -134,11 +134,11 @@ def api_token_is_admin_token(token: str=Depends(auth_scheme)):
 
 
 @app.get('/auth')
-def auth_begin():
+def auth_begin(switch: Optional[bool] = False):
 	token = make_token()
 	auth = tweepy.OAuthHandler(callback=f'{config.api_base_url}/auth-complete?token={token}', **config.twitter_api_credentials)
 	auth_sessions[token] = auth
-	url = auth.get_authorization_url(signin_with_twitter=True) + '&force_login=true'
+	url = auth.get_authorization_url(signin_with_twitter=True) + ('&force_login=true' if switch else '')
 	return AuthResponse(token=token, redirect_url=url)
 
 

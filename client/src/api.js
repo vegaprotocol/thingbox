@@ -1,9 +1,12 @@
-async function auth() {
+async function auth(switchAccount = false) {
 	const token = localStorage.getItem('api_token')
 	if (!token) {
-		const res = await fetch(window.location.origin + '/auth')
+		const res = await fetch(window.location.origin + '/auth' + (switchAccount ? '?switch=true' : ''))
 		const { token: new_token, redirect_url }  = await res.json() 
 		localStorage.setItem('api_token', new_token)
+		if (switchAccount) {
+			window.location.href = redirect_url
+		}
 		return redirect_url
 	}
 	else {
