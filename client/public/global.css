@@ -1,18 +1,3 @@
-@media (prefers-color-scheme: dark) {
-	:root {
-		--nc-d-tx-2: #f00;
-		--nc-tx-2: #bbb;
-		--nc-bg-2: #111;
-		--nc-bg-3: #222;
-	}
-	.warning {
-		color: darkred;
-	}
-	article {
-		border: 2px solid rgb(80, 80, 80);
-		background-color: rgb(20, 20, 20);
-	}
-}
 footer {
 	position: fixed;
 	bottom: 0;
@@ -70,4 +55,19 @@ details[open] summary .editlink {
 	font-weight: normal;
 	/* font-size: 0.8rem; */
 	float: right;
+}
+@media (prefers-color-scheme: dark) {
+	:root {
+		--nc-d-tx-2: #f00;
+		--nc-tx-2: #bbb;
+		--nc-bg-2: #111;
+		--nc-bg-3: #222;
+	}
+	.warning {
+		color: darkred;
+	}
+	article {
+		border: 2px solid rgb(80, 80, 80);
+		background-color: rgb(20, 20, 20);
+	}
 }
