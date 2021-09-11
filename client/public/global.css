@@ -58,3 +58,12 @@ article h3 {
 .warning {
 	color: red;
 }
+details summary .editlink {
+	display: none;
+}
+details[open] summary .editlink {
+	/* display: inline; */
+	font-weight: normal;
+	/* font-size: 0.8rem; */
+	float: right;
+}

@@ -11,6 +11,7 @@
 	let serverPublicKey
 	let adminToken
 	let loginDenied
+	let templates
 
 	if (window.location.hash == '#logout') {
 		logout()
@@ -26,6 +27,9 @@
 			({ screenName, admin: isAdminUser } = await api.getUser())
 			if (isAdminUser && window.location.hash === '#admin') {
 				inAdminMode = true
+			}
+			if (inAdminMode) {
+				templates = await api.getTemplates()
 			}
 			if (screenName) {
 				localStorage.setItem('screen_name', screenName)
@@ -107,7 +111,7 @@
 	{:else if items !== undefined && !inAdminMode}
 		<Itemlist {items} />
 	{:else if items !== undefined && inAdminMode}
-		<Admin {serverPublicKey} {adminToken} {generateAdminToken} {clearTemplateCache} />
+		<Admin {serverPublicKey} {adminToken} {generateAdminToken} {clearTemplateCache} {templates} />
 	{/if}
 	<footer><section><p>&copy; 2021 Gobalsky Labs Ltd. Made with 💛 and 🦔 by the Vega project team.</p></section></footer>
 </main>

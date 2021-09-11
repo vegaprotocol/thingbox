@@ -47,6 +47,12 @@ async function getUser() {
 	return { screenName, id, admin }
 }
 
+async function getTemplates() {
+	const res = await callAuthed(window.location.origin + '/templates')
+	const templates = await res.json()
+	return templates
+}
+
 async function getAdminToken() {
 	const res = await callAuthed(window.location.origin + '/admin-token')
 	const { admin_token } = await res.json()
@@ -64,4 +70,4 @@ async function logout() {
 }
 
 
-export default { auth, getItems, getUser, logout, getPublicKey, getAdminToken, clearTemplateCache }
+export default { auth, getItems, getUser, logout, getPublicKey, getAdminToken, clearTemplateCache, getTemplates }

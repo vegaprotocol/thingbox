@@ -193,5 +193,10 @@ def get_admin_token(session: UserSession=Depends(authenticated_user_is_admin)):
 	return dict(admin_token=token)
 
 
+@app.get('/templates')
+def get_templates(session: UserSession=Depends(authenticated_user_is_admin)):
+	return db.get_templates()
+
+
 if config.static_files_path:
 	app.mount("/", StaticFiles(directory=config.static_files_path, html=True), name="static")

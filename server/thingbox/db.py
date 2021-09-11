@@ -180,5 +180,14 @@ class DB:
 		rows = res.fetchone()
 		return rows['content'] if len(rows) > 0 else None
 
+	def get_templates(self):
+		with self._db as sql:
+			res = sql.execute("""
+				SELECT
+					id, content FROM templates
+			""")
+		rows = res.fetchall()
+		return list(rows)
+
 	def get_public_key(self):
 		return self._public_key
