@@ -11,7 +11,7 @@
 	let serverPublicKey
 	let adminToken
 	let loginDenied
-	let templates
+	let templates = null
 
 	if (window.location.hash == '#logout') {
 		logout()
@@ -63,6 +63,9 @@
 	async function toggleAdminMode() {
 		inAdminMode = !inAdminMode
 		window.location.hash = inAdminMode ? '#admin' : '#'
+		if (inAdminMode && templates === null) {
+			templates = await api.getTemplates() 
+		}
 	}
 
 	async function generateAdminToken() {
