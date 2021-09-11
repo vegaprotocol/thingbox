@@ -166,14 +166,22 @@ def get_items(session: UserSession=Depends(user_is_authenticated)):
 @app.post('/items')
 def post_item(item: Item, batch: Optional[str] = None, close_batch: Optional[bool] = True, session: UserSession=Depends(api_token_is_admin_token)):
 	if batch is None: batch = db.create_or_check_batch(admin=session.admin_id, batch=batch)
+	if not batch: raise HTTPException(status_code=400, detail='error creating batch, is user an admin?')
 	res = db.add_item(**{ **item.dict(), **dict(batch=batch) })
-	if close_batch: db.close_batch(batch)
+	if close_batch: db.close_batch(batch): 
 	return dict(batch=batch, success=res)
 
 
 @app.get('/public-key')
 def get_public_key():
 	return dict(public_key_b58=b58encode(db.get_public_key().encode()).decode())
+
+
+@app.get('clear-template-cache')
+def clear_templarte_cache(session: UserSession=Depends(authenticated_user_is_admin)):
+	num_cleared = len(template_cache)
+	template_cache.clear()
+	return dict(cleared=num_cleared)
 
 
 @app.get('/admin-token')

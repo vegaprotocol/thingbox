@@ -53,6 +53,12 @@ async function getAdminToken() {
 	return admin_token
 }
 
+async function clearTemplateCache() {
+	const res = await callAuthed(window.location.origin + '/clear-template-cache')
+	const { cleared } = await res.json()
+	return cleared
+}
+
 async function logout() {
 	localStorage.removeItem('api_token')
 }

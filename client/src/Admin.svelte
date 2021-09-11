@@ -2,6 +2,7 @@
 	export let serverPublicKey
 	export let adminToken
 	export let generateAdminToken
+	export let clearTemplateCache
 </script>
 
 <section>
@@ -19,4 +20,7 @@
 	{:else}
 		<button on:click={generateAdminToken}>Generate API token</button>
 	{/if}
-</section>
+	<h3>Clear template cache</h3>
+	<p>Click the button below to clear the template cache (e.g. after performing manual DB updates).</p>
+	<button on:click={clearTemplateCache}>Clear cache</button>
+	</section>

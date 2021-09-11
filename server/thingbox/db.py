@@ -82,26 +82,35 @@ class DB:
 
 	def make_admin(self, user_type, user_id):
 		with self._write_mutex, self._db as sql:
-			sql.execute("""
-				INSERT OR REPLACE INTO admins (user_type, user_id, active) VALUES (:user_type, :user_id, TRUE)
-			""", dict(user_type=user_type, user_id=user_id))
-			return True
+			try:
+				sql.execute("""
+					INSERT OR REPLACE INTO admins (user_type, user_id, active) VALUES (:user_type, :user_id, TRUE)
+				""", dict(user_type=user_type, user_id=user_id))
+				return True
+			except sqlite3.IntegrityError:
+				return False
 	
 	def revoke_admin(self, user_type, user_id):
 		with self._write_mutex, self._db as sql:
-			sql.execute("""
-				INSERT OR REPLACE INTO admins (user_type, user_id, active) VALUES (:user_type, :user_id, FALSE)
-			""", dict(user_type=user_type, user_id=user_id))
-			return True	
+			try:
+				sql.execute("""
+					INSERT OR REPLACE INTO admins (user_type, user_id, active) VALUES (:user_type, :user_id, FALSE)
+				""", dict(user_type=user_type, user_id=user_id))
+				return True	
+			except sqlite3.IntegrityError:
+				return False
 
 	def create_or_check_batch(self, admin, batch=None):
 		if batch is None:
 			with self._write_mutex, self._db as sql:
-				batch = self.generate_uid()
-				sql.execute("""
-					INSERT INTO batches (id, admin_id) VALUES (:id, :admin_id)
-				""", dict(id=batch, admin_id=admin))
-				return batch
+				try:
+					batch = self.generate_uid()
+					sql.execute("""
+						INSERT INTO batches (id, admin_id) VALUES (:id, :admin_id)
+					""", dict(id=batch, admin_id=admin))
+					return batch
+				except sqlite3.IntegrityError as e:
+					return None
 		else:
 			with self._db as sql:
 				res = sql.execute("""
@@ -117,9 +126,13 @@ class DB:
 
 	def close_batch(self, batch):
 		with self._write_mutex, self._db as sql:
-			sql.execute("""
-				UPDATE batches SET closed = CURRENT_TIMESTAMP WHERE id = :batch_id
-			""", dict(batch_id=batch))
+			try:
+				sql.execute("""
+					UPDATE batches SET closed = CURRENT_TIMESTAMP WHERE id = :batch_id
+				""", dict(batch_id=batch))
+				return True
+			except sqlite3.IntegrityError:
+				return False
 		
 	def decrypt_data(self, ciphertext):
 		try:

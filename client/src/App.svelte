@@ -65,6 +65,17 @@
 		}
 	}
 
+	async function clearTemplateCache() {
+		if (!inAdminMode) return null
+		try {
+			await api.clearTemplateCache()
+		}
+		catch {
+			await getApiData()
+			return null
+		}
+	}
+
 	getApiData()
 
 </script>
@@ -96,7 +107,7 @@
 	{:else if items !== undefined && !inAdminMode}
 		<Itemlist {items} />
 	{:else if items !== undefined && inAdminMode}
-		<Admin {serverPublicKey} {adminToken} {generateAdminToken} />
+		<Admin {serverPublicKey} {adminToken} {generateAdminToken} {clearTemplateCache} />
 	{/if}
 	<footer><section><p>&copy; 2021 Gobalsky Labs Ltd. Made with 💛 and 🦔 by the Vega project team.</p></section></footer>
 </main>
