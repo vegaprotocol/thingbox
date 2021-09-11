@@ -169,7 +169,7 @@ def post_item(item: Item, batch: Optional[str] = None, close_batch: Optional[boo
 	if not batch: raise HTTPException(status_code=400, detail='error creating batch, is user an admin?')
 	res = db.add_item(**{ **item.dict(), **dict(batch=batch) })
 	if close_batch: db.close_batch(batch)
-	return dict(batch=batch, success=res)
+	return { **dict(batch=batch, success=res), **(dict(error=f'error creating item, ensure template exists: {item.template}') if not res else {}) }
 
 
 @app.get('/public-key')

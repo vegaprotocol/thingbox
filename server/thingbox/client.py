@@ -104,6 +104,7 @@ def add_items(
 					batch_id=batch_id,
 					close_batch=is_last_item)
 				if result and 'batch' in result: batch_id = result['batch']
+				if 'success' in result and not result['success']: raise Exception(repr(result))
 				log_fn(f'{batch_id}#{i}: CREATED {target_type} {target_id} ({category}: {template_id})')
 			except Exception as e:
 				log_fn(f'{batch_id or "????????"}#{i}: ERORR {target_type} {target_id} ({category}: {template_id}): {repr(e)}')
