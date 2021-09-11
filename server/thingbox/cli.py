@@ -104,14 +104,5 @@ def import_items(
 		click.echo(e)
 
 
-@cli.command(help='Create an item rendering template')
-@global_options()
-@click.option('-n', '--name', nargs=1, type=str, required=True, help='Template name / ID')
-@click.option('-t', '--template', required=False, default=None)
-@click.argument('template_file', type=click.File('rb'), required=False, default=sys.stdin)
-def add_template(server, auth_token, name, template, template_file):
-	pass
-
-
 if __name__ == '__main__':
 	cli(auto_envvar_prefix='TB', obj={})
