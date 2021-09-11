@@ -64,4 +64,4 @@ async function logout() {
 }
 
 
-export default { auth, getItems, getUser, logout, getPublicKey, getAdminToken }
+export default { auth, getItems, getUser, logout, getPublicKey, getAdminToken, clearTemplateCache }

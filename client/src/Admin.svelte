@@ -18,9 +18,10 @@
 			<pre>{ adminToken }</pre>
 		</details>
 	{:else}
-		<button on:click={generateAdminToken}>Generate API token</button>
+		<p><button on:click={generateAdminToken}>Generate API token</button></p>
 	{/if}
+	<br>
 	<h3>Clear template cache</h3>
 	<p>Click the button below to clear the template cache (e.g. after performing manual DB updates).</p>
-	<button on:click={clearTemplateCache}>Clear cache</button>
+	<p><button on:click={clearTemplateCache}>Clear cache</button></p>
 	</section>

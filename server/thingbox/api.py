@@ -177,7 +177,7 @@ def get_public_key():
 	return dict(public_key_b58=b58encode(db.get_public_key().encode()).decode())
 
 
-@app.get('clear-template-cache')
+@app.get('/clear-template-cache')
 def clear_templarte_cache(session: UserSession=Depends(authenticated_user_is_admin)):
 	num_cleared = len(template_cache)
 	template_cache.clear()
