@@ -168,7 +168,7 @@ def post_item(item: Item, batch: Optional[str] = None, close_batch: Optional[boo
 	if batch is None: batch = db.create_or_check_batch(admin=session.admin_id, batch=batch)
 	if not batch: raise HTTPException(status_code=400, detail='error creating batch, is user an admin?')
 	res = db.add_item(**{ **item.dict(), **dict(batch=batch) })
-	if close_batch: db.close_batch(batch): 
+	if close_batch: db.close_batch(batch)
 	return dict(batch=batch, success=res)
 
 
