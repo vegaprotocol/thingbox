@@ -45,7 +45,7 @@ article h3 {
 	font-weight: normal;
 }
 .warning {
-	color: red;
+	color: darkred;
 }
 details summary .editlink {
 	display: none;
@@ -64,7 +64,7 @@ details[open] summary .editlink {
 		--nc-bg-3: #222;
 	}
 	.warning {
-		color: darkred;
+		color: red;
 	}
 	article {
 		border: 2px solid rgb(80, 80, 80);
