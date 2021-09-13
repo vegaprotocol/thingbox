@@ -1,9 +1,9 @@
 import requests
 import json
 from dataclasses import asdict, dataclass
-from base58 import b58decode
+from base58 import b58decode, b58encode
 from base64 import b64encode
-from nacl.public import SealedBox, PublicKey
+from nacl.public import SealedBox, PublicKey, PrivateKey
 
 
 @dataclass
@@ -34,6 +34,11 @@ def encrypt(plaintext, public_key_b58):
 	box = SealedBox(PublicKey(b58decode(public_key_b58)))
 	ciphertext = box.encrypt(plaintext=plaintext.encode())
 	return b64encode(ciphertext).decode('utf-8')
+
+
+def generate_private_key():
+	private_key = PrivateKey.generate()
+	return b58encode(private_key.encode()).decode('utf-8')
 
 
 def add_item(

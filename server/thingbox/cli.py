@@ -18,14 +18,21 @@ def global_options(server=True, auth_token=True):
 	return global_options_wrapper
 
 
-@cli.command(help='Encrypt input to the server\'s public key')
+@cli.command(help='Encrypt data to the server\'s public key')
 @global_options(auth_token=False)
-@click.argument('plaintext_file', type=click.File('rb'), required=False, default=sys.stdin)
-def encrypt(server, plaintext, plaintext_file):
+@click.option('-d', '--data')
+@click.argument('data_file', type=click.File('rb'), required=False, default=sys.stdin)
+def encrypt(server, data, data_file):
 	public_key = client.get_public_key(server)
-	if plaintext is None: plaintext = plaintext_file.read()
-	ciphertext = client.encrypt(plaintext=plaintext, public_key_b58=public_key)
-	return ciphertext
+	if data is None: data = data_file.read()
+	ciphertext = client.encrypt(plaintext=data, public_key_b58=public_key)
+	click.echo(ciphertext)
+
+
+@cli.command(help='Generate a server private (secret) key')
+def generate_key():
+	private_key = client.generate_private_key()
+	click.echo(private_key)
 
 
 @cli.command(help="Encrypt and add an item for a given user ID")
