@@ -1,15 +1,27 @@
+from dataclasses import dataclass
 import sqlite3
+import shutil
 from os import urandom
 from base64 import b64decode
 from base58 import b58encode
 from nacl.public import PrivateKey, SealedBox
 from threading import Lock
+from datetime import datetime
+from os import path
+
+
+@dataclass
+class BackupConfig:
+	tmp_path: str
+	backup_path: str
+	name_template: str
 
 
 class DB:
 	
-	def __init__(self, filepath, private_key_bytes, id_len_bytes):
+	def __init__(self, filepath, private_key_bytes, id_len_bytes, backup_config):
 		self._id_len_bytes = id_len_bytes
+		self._backup_config = backup_config
 		self._write_mutex = Lock()
 		self._db = sqlite3.connect(filepath, check_same_thread=False)
 		self._db.row_factory = sqlite3.Row
@@ -63,6 +75,17 @@ class DB:
 			sql.execute("""
 				CREATE INDEX IF NOT EXISTS items_by_target ON items (target_type, target_id, category);
 			""")
+
+	def backup(self):
+		filename = self._backup_config.name_template.format(dict(timestamp=datetime.datetime.now().strftime('%Y%m%d-%H%M%S.%f')))
+		create_filepath = path.join(self._backup_config.tmp_path or self._backup_config.backup_path, filename)ß
+		backup_filepath = path.join(self._backup_config.backup_path, filename)
+		with self._write_mutex:
+			backup_db = sqlite3.connect(create_filepath)
+			self._db.backup(backup_db)
+			backup_db.close()
+		if self._backup_config.tmp_path:
+			shutil.move(create_filepath, backup_filepath)
 
 	def generate_uid(self):
 		return b58encode(urandom(self._id_len_bytes)).decode('utf-8')
