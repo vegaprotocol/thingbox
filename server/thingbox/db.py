@@ -86,7 +86,7 @@ class DB:
 			""")
 
 	def backup(self):
-		filename = self._backup_config.name_template.format(dict(timestamp=datetime.now().strftime('%Y%m%d-%H%M%S.%f')))
+		filename = self._backup_config.name_template.format(**dict(timestamp=datetime.now().strftime('%Y%m%d-%H%M%S.%f')))
 		create_filepath = path.join(self._backup_config.tmp_path or self._backup_config.backup_path, filename)
 		backup_filepath = path.join(self._backup_config.backup_path, filename)
 		with self._write_mutex:
