@@ -29,6 +29,7 @@ class Config(BaseSettings):
 	backup_path: str
 	backup_interval: Optional[int] = None
 	backup_tmp_path: Optional[str] = None
+	backup_on_batch_close: bool = False
 	auth_timeout: int = 303
 	session_ttl: int = 3600
 	admin_ttl: int = 900
@@ -66,7 +67,8 @@ db_backup_config = BackupConfig(
 	backup_path=config.backup_path,
 	tmp_path=config.backup_tmp_path,
 	backup_interval=config.backup_interval,
-	name_template='db_backup_{timestamp}'
+	backup_on_batch_close=True,
+	name_template='thingbox_db_backup_{timestamp}'
 )
 
 db = DB(

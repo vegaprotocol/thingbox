@@ -18,6 +18,7 @@ class BackupConfig:
 	name_template: str
 	tmp_path: Optional[str] = None
 	backup_interval: Optional[int] = None
+	backup_on_batch_close: bool = False
 
 
 class DB:
@@ -164,15 +165,19 @@ class DB:
 				return batch
 
 	def close_batch(self, batch):
+		result = False
 		with self._write_mutex, self._db as sql:
 			try:
 				sql.execute("""
 					UPDATE batches SET closed = CURRENT_TIMESTAMP WHERE id = :batch_id
 				""", dict(batch_id=batch))
-				return True
+				result = True
 			except sqlite3.IntegrityError:
-				return False
-		
+				result = False
+		if self._backup_config and self._backup_config.backup_on_batch_close:
+			self.backup()
+		return result
+
 	def decrypt_data(self, ciphertext):
 		try:
 			return self._crypto.decrypt(ciphertext=b64decode(ciphertext)).decode('utf-8')
