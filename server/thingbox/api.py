@@ -68,7 +68,7 @@ db_backup_config = BackupConfig(
 	tmp_path=config.backup_tmp_path,
 	backup_interval=config.backup_interval,
 	backup_on_batch_close=True,
-	name_template='thingbox_db_backup_{timestamp}'
+	name_template='thingbox_db_backup_{timestamp}.db'
 )
 
 db = DB(

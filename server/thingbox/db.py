@@ -94,8 +94,8 @@ class DB:
 			backup_db = sqlite3.connect(create_filepath)
 			self._db.backup(backup_db)
 			backup_db.close()
-		if self._backup_config.tmp_path:
-			shutil.move(create_filepath, backup_filepath)
+		if self._backup_config.tmp_path and create_filepath != backup_filepath:
+			shutil.move(src=create_filepath, dst=backup_filepath)
 
 	def backup_periodically(self):
 		while True:
