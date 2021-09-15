@@ -3,23 +3,26 @@ import sqlite3
 import shutil
 from os import urandom
 from base64 import b64decode
+from typing import Optional
 from base58 import b58encode
 from nacl.public import PrivateKey, SealedBox
-from threading import Lock
+from threading import Lock, Thread
 from datetime import datetime
 from os import path
+from time import sleep
 
 
 @dataclass
 class BackupConfig:
-	tmp_path: str
 	backup_path: str
 	name_template: str
+	tmp_path: Optional[str] = None
+	backup_interval: Optional[int] = None
 
 
 class DB:
 	
-	def __init__(self, filepath, private_key_bytes, id_len_bytes, backup_config):
+	def __init__(self, filepath, private_key_bytes, id_len_bytes, backup_config=None):
 		self._id_len_bytes = id_len_bytes
 		self._backup_config = backup_config
 		self._write_mutex = Lock()
@@ -30,6 +33,11 @@ class DB:
 		private_key = PrivateKey(private_key_bytes)
 		self._crypto = SealedBox(private_key)
 		self._public_key = private_key.public_key
+		if self._backup_config and self._backup_config.backup_interval and self._backup_config.backup_interval > 0:
+			self.backup()
+			backup_thread = Thread(target=self.backup_periodically, args=())
+			backup_thread.daemon = True
+			backup_thread.start()
 
 	def ensure_schema(self):
 		with self._write_mutex, self._db as sql:
@@ -78,7 +86,7 @@ class DB:
 
 	def backup(self):
 		filename = self._backup_config.name_template.format(dict(timestamp=datetime.datetime.now().strftime('%Y%m%d-%H%M%S.%f')))
-		create_filepath = path.join(self._backup_config.tmp_path or self._backup_config.backup_path, filename)ß
+		create_filepath = path.join(self._backup_config.tmp_path or self._backup_config.backup_path, filename)
 		backup_filepath = path.join(self._backup_config.backup_path, filename)
 		with self._write_mutex:
 			backup_db = sqlite3.connect(create_filepath)
@@ -86,6 +94,14 @@ class DB:
 			backup_db.close()
 		if self._backup_config.tmp_path:
 			shutil.move(create_filepath, backup_filepath)
+
+	def backup_periodically(self):
+		while True:
+			sleep(self._backup_config.backup_interval)
+			try:
+				self.backup()
+			except Exception as e:
+				print(f'Error doing backup: {repr(e)}')
 
 	def generate_uid(self):
 		return b58encode(urandom(self._id_len_bytes)).decode('utf-8')

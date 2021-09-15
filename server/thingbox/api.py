@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from thingbox import __version__ as version
-from thingbox.db import DB
+from thingbox.db import DB, BackupConfig
 
 
 class Config(BaseSettings):
@@ -26,6 +26,9 @@ class Config(BaseSettings):
 	twitter_api_secret: str
 	database_file: str
 	private_key_b58: str
+	backup_path: str
+	backup_interval: Optional[int] = None
+	backup_tmp_path: Optional[str] = None
 	auth_timeout: int = 303
 	session_ttl: int = 3600
 	admin_ttl: int = 900
@@ -59,10 +62,18 @@ app = FastAPI(
 	docs_url=None, redoc_url=None
 )
 
+db_backup_config = BackupConfig(
+	backup_path=config.backup_path,
+	tmp_path=config.backup_tmp_path,
+	backup_interval=config.backup_interval,
+	name_template='db_backup_{timestamp}'
+)
+
 db = DB(
 	filepath=config.database_file,
 	private_key_bytes=b58decode(config.private_key_b58), 
-	id_len_bytes=config.id_length_bytes)
+	id_len_bytes=config.id_length_bytes,
+	backup_config=db_backup_config)
 
 app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_headers=['Authorization'])
 auth_scheme = OAuth2PasswordBearer(tokenUrl='auth')
@@ -187,7 +198,7 @@ def get_public_key():
 
 
 @app.get('/clear-template-cache')
-def clear_templarte_cache(session: UserSession=Depends(authenticated_user_is_admin)):
+def clear_template_cache(session: UserSession=Depends(authenticated_user_is_admin)):
 	num_cleared = len(template_cache)
 	template_cache.clear()
 	return dict(cleared=num_cleared)
