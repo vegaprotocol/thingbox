@@ -8,7 +8,7 @@ from base58 import b58encode
 from nacl.public import PrivateKey, SealedBox
 from threading import Lock, Thread
 from datetime import datetime
-from os import path
+from os import path, makedirs
 from time import sleep
 
 
@@ -106,6 +106,8 @@ class DB:
 
 	def backup(self):
 		filename = self._backup_config.name_template.format(**dict(timestamp=datetime.now().strftime('%Y%m%d-%H%M%S.%f')))
+		self._backup_config.backup_path and makedirs(self._backup_config.backup_path, exist_ok=True)
+		self._backup_config.tmp_path and makedirs(self._backup_config.tmp_path, exist_ok=True)
 		create_filepath = path.join(self._backup_config.tmp_path or self._backup_config.backup_path, filename)
 		backup_filepath = path.join(self._backup_config.backup_path, filename)
 		print(f'Backup started, tmp={create_filepath}, target={backup_filepath}')
