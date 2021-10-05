@@ -14,10 +14,10 @@ async function auth(switchAccount = false) {
 	}
 }
 
-async function callAuthed(url) {
+async function callAuthed(url, method = 'GET', body = null) {
 	const token = localStorage.getItem('api_token')
 	if (token) {
-		const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } })
+		const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token }, method, body })
 		if (res.status == 401) {
 			localStorage.removeItem('api_token')
 			throw new Error('unauthorised')
@@ -68,9 +68,32 @@ async function clearTemplateCache() {
 	return cleared
 }
 
+async function updateTemplate(id, newContent) {
+	const res = await callAuthed(window.location.origin + '/templates/' + id, 'PUT', newContent)
+	const { success } = await res.json()
+	return success
+}
+
+async function getContent(ids) {
+	const res = await fetch(window.location.origin + '/content?id=' + ids.join('&id='))
+	content = await res.json()
+	return content
+}
+
 async function logout() {
 	localStorage.removeItem('api_token')
 }
 
 
-export default { auth, getItems, getUser, logout, getPublicKey, getAdminToken, clearTemplateCache, getTemplates }
+export default { 
+	auth, 
+	getItems, 
+	getUser, 
+	logout, 
+	getPublicKey, 
+	getAdminToken, 
+	clearTemplateCache, 
+	getTemplates,
+	updateTemplate,
+	getContent,
+}

@@ -1,14 +1,14 @@
 import json
 from os import urandom, environ
 from dataclasses import dataclass
-from typing import Optional
+from typing import List, Optional
 
 import tweepy
 import chevron
 from cachetools import TTLCache, LRUCache
 from base58 import b58encode, b58decode
 from pydantic import BaseModel, BaseSettings
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Body, Query
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,7 +26,7 @@ class Config(BaseSettings):
 	twitter_api_secret: str
 	database_file: str
 	private_key_b58: str
-	backup_path: str
+	backup_path: Optional[str] = None
 	backup_interval: Optional[int] = None
 	backup_tmp_path: Optional[str] = None
 	backup_on_batch_close: bool = False
@@ -69,7 +69,7 @@ db_backup_config = BackupConfig(
 	backup_interval=config.backup_interval,
 	backup_on_batch_close=True,
 	name_template='thingbox_db_backup_{timestamp}.db'
-)
+) if config.backup_path else None
 
 db = DB(
 	filepath=config.database_file,
@@ -180,7 +180,9 @@ def get_items(session: UserSession=Depends(user_is_authenticated)):
 def get_items(session: UserSession=Depends(user_is_authenticated)):
 	result = db.get_items('twitter', session.user.id_str)
 	items = [
-		chevron.render(template=get_template_cached(r['template_id']), data=json.loads(r['data'])) 
+		chevron.render(template=get_template_cached(r['template_id']), data={ **json.loads(r['data']), **{
+			'include': db.get_site_content
+		}}) 
 		for r in result if r['data'] is not None]
 	return items
 
@@ -219,6 +221,34 @@ def get_admin_token(session: UserSession=Depends(authenticated_user_is_admin)):
 def get_templates(session: UserSession=Depends(authenticated_user_is_admin)):
 	return db.get_templates()
 
+@app.get('/templates/{template_id}')
+def get_template(template_id, session: UserSession=Depends(authenticated_user_is_admin)):
+	if (res := db.get_template(template=template_id)) == None:
+		raise HTTPException(status_code=404, detail=f'No template with id {template_id}')
+	else:
+		return res
+
+@app.post('/templates/{template_id}')
+def create_template(template_id, content: str = Body(default=None), session: UserSession=Depends(authenticated_user_is_admin)):
+	if content is None: raise HTTPException(status_code=400, detail='Template content required in request body')
+	success = db.add_template(template_id=template_id, content=content)
+	if success: template_cache.clear()
+	return dict(success=success)
+
+@app.put('/templates/{template_id}')
+def update_template(template_id, content: str = Body(default=None), session: UserSession=Depends(authenticated_user_is_admin)):
+	if content is None: raise HTTPException(status_code=400, detail='Template content required in request body')
+	success = db.update_template(template_id=template_id, content=content)
+	if success: template_cache.clear()
+	return dict(success=success)
+
+@app.get('/content')
+def get_site_content(id: List[str] = Query([])):
+	return db.get_site_content_multi(ids=id)
+
+@app.get('/content/{id}')
+def get_site_content(id: str):
+	return db.get_site_content_multi(ids=[id])
 
 if config.static_files_path:
 	app.mount("/", StaticFiles(directory=config.static_files_path, html=True), name="static")

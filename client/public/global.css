@@ -47,11 +47,15 @@ article h3 {
 .warning {
 	color: darkred;
 }
+textarea {
+	width: 100%;
+	height: 12rem;
+}
 details summary .editlink {
 	display: none;
 }
 details[open] summary .editlink {
-	/* display: inline; */
+	display: inline;
 	font-weight: normal;
 	/* font-size: 0.8rem; */
 	float: right;

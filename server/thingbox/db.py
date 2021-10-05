@@ -53,7 +53,8 @@ class DB:
 			""")
 			sql.execute("""
 				CREATE TABLE IF NOT EXISTS templates (
-					id TEXT NOT NULL PRIMARY KEY, 
+					id TEXT NOT NULL PRIMARY KEY,
+					type TEXT NOT NULL,
 					content TEXT NOT NULL
 				)
 			""")
@@ -214,25 +215,65 @@ class DB:
 		decrypted_rows = [{ 'data': self.decrypt_data(r['data']), 'template_id': r['template_id'] } for r in rows]
 		return list(filter(lambda x: x['data'] is not None, decrypted_rows))
 
-	def get_template(self, template):
+	def get_template(self, template, type='item'):
 		with self._db as sql:
 			res = sql.execute("""
 				SELECT
 					content FROM templates
 				WHERE
 					id = :template_id
-			""", dict(template_id=template))
+					AND type = :type
+			""", dict(template_id=template, type=type))
 		rows = res.fetchone()
 		return rows['content'] if len(rows) > 0 else None
+
+	def add_template(self, template_id, content, type='item'):
+		with self._write_mutex, self._db as sql:
+			try:
+				sql.execute("""
+					INSERT 
+						INTO templates (id, content, type) 
+						VALUES (:id, :content, :type)
+				""", dict(id=template_id, content=content, type=type))
+				return True
+			except Exception as e:
+				print(repr(e))
+				return False	
+
+	def update_template(self, template_id, content):
+		if self.get_template(template=template_id) is None: return False
+		with self._write_mutex, self._db as sql:
+			sql.execute("""
+				UPDATE templates SET content = :content WHERE id = :id
+			""", dict(id=template_id, content=content))
+			return True
 
 	def get_templates(self):
 		with self._db as sql:
 			res = sql.execute("""
 				SELECT
-					id, content FROM templates
+					id, content, type FROM templates
 			""")
 		rows = res.fetchall()
 		return list(rows)
+
+	def get_site_content_multi(self, ids):
+		res = [self.get_site_content(x) for x in ids]
+		return {k: v for d in res for k, v in d.items()}
+	
+	def get_site_content(self, id):
+		with self._db as sql:
+			res = sql.execute("""
+				SELECT
+					id, content 
+				FROM 
+					templates
+				WHERE
+					id = :id
+					AND type = 'site'
+			""", dict(id=id))
+			row = res.fetchone()
+		return { row['id']: row['content'] } if row else None
 
 	def get_public_key(self):
 		return self._public_key

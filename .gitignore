@@ -4,6 +4,6 @@ __pycache__
 build/
 dist/
 .vscode/
-*.db
+*.db*
 *.env
 !dev.env

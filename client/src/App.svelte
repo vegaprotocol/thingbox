@@ -28,7 +28,7 @@
 			if (isAdminUser && window.location.hash === '#admin') {
 				inAdminMode = true
 			}
-			if (inAdminMode) {
+			if (isAdminUser) {
 				templates = await api.getTemplates()
 			}
 			if (screenName) {
@@ -121,7 +121,7 @@
 	{:else if items !== undefined && !inAdminMode}
 		<Itemlist {items} />
 	{:else if items !== undefined && inAdminMode}
-		<Admin {serverPublicKey} {adminToken} {generateAdminToken} {clearTemplateCache} {templates} />
+		<Admin {serverPublicKey} {adminToken} {generateAdminToken} {clearTemplateCache} {templates} updateTemplate={api.updateTemplate} />
 	{/if}
 	<footer><section><p>&copy; 2021 Gobalsky Labs Ltd. Made with 💛 and 🦔 by the Vega project team. <a href="https://vega.xyz/privacy/">Privacy</a>.</p></section></footer>
 </main>
