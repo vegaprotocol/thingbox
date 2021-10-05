@@ -76,7 +76,7 @@ async function updateTemplate(id, newContent, type = 'item') {
 
 async function getContent(ids) {
 	const res = await fetch(window.location.origin + '/content?id=' + ids.join('&id='))
-	content = await res.json()
+	const content = await res.json()
 	return content
 }
 

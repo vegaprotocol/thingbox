@@ -2,21 +2,26 @@ import { writable } from 'svelte/store';
 import api from './api.js'
 
 
-export const content = writable({
-	'site-title': '',
-	'site-home-logged-out': '',
-	'site-home-empty': '',
-	'site-home-normal': '',
-});
-
-export async function update() {
-	const newContent = await api.getContent([
-		'site-title',
-		'site-home-logged-out',
-		'site-home-empty',
-		'site-home-normal',
-	])
-	content.set(newContent)
+function createContent() {
+	const { subscribe, set } = writable({
+		'site-title': '',
+		'site-home-logged-out': '',
+		'site-home-empty': '',
+		'site-home-normal': '',
+	});
+	const contentStore = {
+		subscribe,
+		async update() {
+			set(await api.getContent([
+				'site-title',
+				'site-home-logged-out',
+				'site-home-empty',
+				'site-home-normal',
+			]))
+		}
+	}
+	contentStore.update()
+	return contentStore
 }
 
-update()
+export const content = createContent()
