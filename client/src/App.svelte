@@ -1,5 +1,7 @@
 <script>
+	import { md } from './md.js'
 	import api from './api.js'
+	import { content } from './content.js'
 	import Itemlist from './ItemList.svelte'
 	import Admin from './Admin.svelte'
 
@@ -97,7 +99,7 @@
 <main>
 	<header>
 		<nav>
-			<h1>Fairground incentives 🎡</h1>
+			<h1>{@html $content['site-title'] }</h1>
 			{#if screenName} 
 				<p>	
 					<a on:click|preventDefault={logout} href="#logout">Log out @{screenName}</a> / <a href="#switch-account" on:click|preventDefault={switchAccount}>change account</a>
@@ -113,7 +115,7 @@
 			{#if loginDenied}
 				<p class="warning">Login failed or cancelled, try again.</p>
 			{/if}
-			<p>Sign in with Twitter to access your Fairground incentives claim links. You must use the same Twitter account that you used to register with Vega Fairground.</p>
+			{@html md.render($content['site-home-logged-out']) }
 			{#if authUrl}
 				<p>👉 <a href={authUrl}>Connect my Twitter account</a></p>
 			{/if}

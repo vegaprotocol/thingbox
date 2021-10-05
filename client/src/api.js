@@ -68,8 +68,8 @@ async function clearTemplateCache() {
 	return cleared
 }
 
-async function updateTemplate(id, newContent) {
-	const res = await callAuthed(window.location.origin + '/templates/' + id, 'PUT', newContent)
+async function updateTemplate(id, newContent, type = 'item') {
+	const res = await callAuthed(window.location.origin + '/templates/' + id + '?type=' + type, 'PUT', newContent)
 	const { success } = await res.json()
 	return success
 }

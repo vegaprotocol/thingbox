@@ -41,7 +41,7 @@ import { trusted } from "svelte/internal";
 		const td = templateData[templateId]
 		if (td.actionText() === 'save') {
 			try {
-				const res = await updateTemplate(td.id, td.edited)
+				const res = await updateTemplate(td.id, td.edited, td.type)
 				if (res) {
 					td.original = td.edited.slice()
 					td.editing = !td.editing
@@ -93,5 +93,5 @@ import { trusted } from "svelte/internal";
 			{/if}
 		</details>
 	{/each}
-	<p><button on:click={clearTemplateCache}>Clear template cache</button></p>
+	<p><button on:click={clearTemplateCache}>Clear server template cache</button></p>
 </section>

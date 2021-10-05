@@ -47,6 +47,10 @@ article h3 {
 .warning {
 	color: darkred;
 }
+p.no-title {
+	margin-top: 0.5rem !important;
+	margin-bottom: 0.5rem !important;
+}
 textarea {
 	width: 100%;
 	height: 12rem;

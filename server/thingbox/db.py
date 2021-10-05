@@ -21,6 +21,14 @@ class BackupConfig:
 	backup_on_batch_close: bool = False
 
 
+DEFAULT_SITE_TEMPLATES = {
+	'site-title': 'My thingbox instance',
+	'site-home-logged-out': 'Login with Twitter to view your items.',
+	'site-home-empty': '## No items.',
+	'site-home-normal': '# My items\n\nSee your items below.',
+}
+
+
 class DB:
 	
 	def __init__(self, filepath, private_key_bytes, id_len_bytes, backup_config=None):
@@ -31,6 +39,7 @@ class DB:
 		self._db.row_factory = sqlite3.Row
 		with self._db as sql: sql.execute('PRAGMA foreign_keys = ON')
 		self.ensure_schema()
+		self.ensure_site_templates()
 		private_key = PrivateKey(private_key_bytes)
 		self._crypto = SealedBox(private_key)
 		self._public_key = private_key.public_key
@@ -86,6 +95,13 @@ class DB:
 				CREATE INDEX IF NOT EXISTS items_by_target ON items (target_type, target_id, category);
 			""")
 
+	def ensure_site_templates(self):
+		with self._write_mutex, self._db as sql:
+			for template_id, content in DEFAULT_SITE_TEMPLATES.items():
+				sql.execute("""
+					INSERT OR IGNORE INTO templates (id, type, content) VALUES (:template_id, 'site', :content)
+				""", dict(template_id=template_id, content=content))
+
 	def backup(self):
 		filename = self._backup_config.name_template.format(**dict(timestamp=datetime.now().strftime('%Y%m%d-%H%M%S.%f')))
 		create_filepath = path.join(self._backup_config.tmp_path or self._backup_config.backup_path, filename)
@@ -120,7 +136,7 @@ class DB:
 					AND active = TRUE
 			""", dict(user_type=user_type, user_id=user_id))
 			row = res.fetchone()
-			return row['id'] if row else None
+			return row and row['id']
 
 	def make_admin(self, user_type, user_id):
 		with self._write_mutex, self._db as sql:
@@ -203,7 +219,7 @@ class DB:
 		with self._db as sql:
 			res = sql.execute("""
 				SELECT 
-					category, data, template_id FROM items 
+					id, category, data, template_id FROM items 
 				WHERE
 					target_type = :target_type 
 					AND target_id = :target_id
@@ -212,7 +228,7 @@ class DB:
 					created DESC
 			""", dict(target_type=target_type, target_id=target_id))
 		rows = res.fetchall()
-		decrypted_rows = [{ 'data': self.decrypt_data(r['data']), 'template_id': r['template_id'] } for r in rows]
+		decrypted_rows = [{ 'data': self.decrypt_data(r['data']), 'template_id': r['template_id'], 'id': r['id'] } for r in rows]
 		return list(filter(lambda x: x['data'] is not None, decrypted_rows))
 
 	def get_template(self, template, type='item'):
@@ -224,8 +240,8 @@ class DB:
 					id = :template_id
 					AND type = :type
 			""", dict(template_id=template, type=type))
-		rows = res.fetchone()
-		return rows['content'] if len(rows) > 0 else None
+		row = res.fetchone()
+		return row and row['content']
 
 	def add_template(self, template_id, content, type='item'):
 		with self._write_mutex, self._db as sql:
@@ -240,12 +256,12 @@ class DB:
 				print(repr(e))
 				return False	
 
-	def update_template(self, template_id, content):
-		if self.get_template(template=template_id) is None: return False
+	def update_template(self, template_id, content, type='item'):
 		with self._write_mutex, self._db as sql:
+			if self.get_template(template=template_id, type=type) is None: return False
 			sql.execute("""
-				UPDATE templates SET content = :content WHERE id = :id
-			""", dict(id=template_id, content=content))
+				UPDATE templates SET content = :content WHERE id = :id AND type = :type
+			""", dict(id=template_id, content=content, type=type))
 			return True
 
 	def get_templates(self):
@@ -273,7 +289,7 @@ class DB:
 					AND type = 'site'
 			""", dict(id=id))
 			row = res.fetchone()
-		return { row['id']: row['content'] } if row else None
+		return { row['id']: row['content'] } if row else {}
 
 	def get_public_key(self):
 		return self._public_key

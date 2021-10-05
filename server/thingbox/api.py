@@ -179,11 +179,16 @@ def get_items(session: UserSession=Depends(user_is_authenticated)):
 @app.get('/items')
 def get_items(session: UserSession=Depends(user_is_authenticated)):
 	result = db.get_items('twitter', session.user.id_str)
-	items = [
-		chevron.render(template=get_template_cached(r['template_id']), data={ **json.loads(r['data']), **{
-			'include': db.get_site_content
-		}}) 
-		for r in result if r['data'] is not None]
+	items = []
+	for r in filter(lambda r: r is not None, result):
+		try:
+			items.append(chevron.render(template=get_template_cached(r['template_id']), data={ **json.loads(r['data']), **{
+				'include': lambda text, render: db.get_site_content(text).get(text, f'<Missing: {text}>')
+			}}))
+		except Exception as e:
+			print(f'Template error rendering item {r["id"]} in template: {r["template_id"]}')
+			print(e)
+			items.append(f'<p class="no-title">Template error rendering item with ID: {r["id"]}</p>')
 	return items
 
 
@@ -236,9 +241,9 @@ def create_template(template_id, content: str = Body(default=None), session: Use
 	return dict(success=success)
 
 @app.put('/templates/{template_id}')
-def update_template(template_id, content: str = Body(default=None), session: UserSession=Depends(authenticated_user_is_admin)):
+def update_template(template_id, type: str = 'item', content: str = Body(default=None), session: UserSession=Depends(authenticated_user_is_admin)):
 	if content is None: raise HTTPException(status_code=400, detail='Template content required in request body')
-	success = db.update_template(template_id=template_id, content=content)
+	success = db.update_template(template_id=template_id, content=content, type=type)
 	if success: template_cache.clear()
 	return dict(success=success)
 
