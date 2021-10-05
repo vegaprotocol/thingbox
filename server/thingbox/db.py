@@ -44,7 +44,7 @@ class DB:
 		private_key = PrivateKey(private_key_bytes)
 		self._crypto = SealedBox(private_key)
 		self._public_key = private_key.public_key
-		print(f'Cryptographic keys initialised, server public key: {self.get_public_key()}')
+		print(f'Cryptographic keys initialised, server public key: {b58encode(self.get_public_key().encode()).decode()}')
 		if self._backup_config and self._backup_config.backup_interval and self._backup_config.backup_interval > 0:
 			self.backup()
 			backup_thread = Thread(target=self.backup_periodically, args=())
