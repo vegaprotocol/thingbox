@@ -40,9 +40,11 @@ class DB:
 		with self._db as sql: sql.execute('PRAGMA foreign_keys = ON')
 		self.ensure_schema()
 		self.ensure_site_templates()
+		print(f'Database opened and initialised: {filepath}')
 		private_key = PrivateKey(private_key_bytes)
 		self._crypto = SealedBox(private_key)
 		self._public_key = private_key.public_key
+		print(f'Cryptographic keys initialised, server public key: {self.get_public_key()}')
 		if self._backup_config and self._backup_config.backup_interval and self._backup_config.backup_interval > 0:
 			self.backup()
 			backup_thread = Thread(target=self.backup_periodically, args=())
