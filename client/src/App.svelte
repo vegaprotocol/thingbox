@@ -24,6 +24,10 @@
 		logout()
 	}
 
+	if (window.location.hash == '#switch-account') {
+		switchAccount()
+	}
+
 	async function getApiData() {
 		try {
 			({ screenName, admin: isAdminUser } = await api.getUser())
