@@ -5,6 +5,7 @@ import api from './api.js'
 function createContent() {
 	const { subscribe, set } = writable({
 		'site-title': '',
+		'site-footer': '',
 		'site-home-logged-out': '',
 		'site-home-empty': '',
 		'site-home-normal': '',
@@ -14,6 +15,7 @@ function createContent() {
 		async update() {
 			set(await api.getContent([
 				'site-title',
+				'site-footer',
 				'site-home-logged-out',
 				'site-home-empty',
 				'site-home-normal',

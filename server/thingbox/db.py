@@ -23,6 +23,7 @@ class BackupConfig:
 
 DEFAULT_SITE_TEMPLATES = {
 	'site-title': 'My thingbox instance',
+	'site-footer': '&copy; 2021 SuperEvilMegaCorp, your soul belongs to us now. (change me)',
 	'site-home-logged-out': 'Login with Twitter to view your items.',
 	'site-home-empty': '## No items.',
 	'site-home-normal': '# My items\n\nSee your items below.',

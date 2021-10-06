@@ -18,6 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from thingbox import __version__ as version
 from thingbox.db import DB, BackupConfig
 
+
 TEMPLATE_GLOBALS = { 
 	'include': lambda template_id, render: render(db.get_site_content(template_id).get(template_id, f'<mark>«Missing: {template_id}»</mark>')),
 	'decimal_amount': lambda x, render: f'{float(render(x)) / 10 ** 18:.2f}',
