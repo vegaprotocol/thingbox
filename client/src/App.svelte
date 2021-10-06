@@ -1,8 +1,4 @@
 <script>
-import { md } from "./md";
-
-</script>
-<script>
 	import { md } from './md.js'
 	import api from './api.js'
 	import { content } from './content.js'
