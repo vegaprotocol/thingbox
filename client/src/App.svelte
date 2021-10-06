@@ -109,7 +109,7 @@
 			<h1>{@html $content['site-title'] }</h1>
 			{#if screenName} 
 				<p>	
-					<a on:click|preventDefault={logout} href="#logout">Log out @{screenName}</a> / <a href="#switch-account" on:click|preventDefault={switchAccount}>change account</a>
+					<a on:click|preventDefault={logout} href="#logout">Log out @{screenName}</a> / <a href="#switch-account">change account</a>
 					{#if isAdminUser}
 					/ <a href={inAdminMode ? '#home' : '#admin'} on:click|preventDefault={toggleAdminMode}>{inAdminMode ? 'home' : 'admin'}</a>
 					{/if}
