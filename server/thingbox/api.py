@@ -28,7 +28,7 @@ TEMPLATE_GLOBALS = {
 
 class Config(BaseSettings):
 	app_title: str
-	app_base_url: str,
+	app_base_url: str
 	api_base_url: str
 	twitter_api_key: str
 	twitter_api_secret: str
