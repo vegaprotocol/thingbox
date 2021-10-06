@@ -20,7 +20,7 @@ from thingbox.db import DB, BackupConfig
 
 TEMPLATE_GLOBALS = { 
 	'include': lambda template_id, render: render(db.get_site_content(template_id).get(template_id, f'<mark>«Missing: {template_id}»</mark>')),
-	'amount': lambda x, render: f'{int(render(x)) / 10 ** 18:.2f}',
+	'amount': lambda x, render: f'{float(render(x)) / 10 ** 18:.2f}',
 	'iso_date': lambda x, render: datetime.fromisoformat(render(x)).strftime('%-d %B %Y'),
 	'unix_date': lambda x, render: datetime.fromtimestamp(render(x)).strftime('%-d %B %Y')
 }
