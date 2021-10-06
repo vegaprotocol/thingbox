@@ -114,7 +114,7 @@ def import_items(
 			dry_run=not send,
 			log_fn=click.echo)
 	except Exception as e:
-		click.echo(e)
+		click.echo(repr(e))
 
 
 if __name__ == '__main__':
