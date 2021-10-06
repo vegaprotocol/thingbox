@@ -29,7 +29,7 @@
 	}
 
 	window.addEventListener('hashchange', checkLocationHash)
-	checkLocationHash()
+	// checkLocationHash()
 
 	async function getApiData() {
 		try {
