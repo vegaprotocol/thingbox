@@ -15,18 +15,21 @@
 	let loginDenied
 	let templates = null
 
-	if (window.location.hash == '#logout') {
-		logout()
+	function checkLocationHash() {
+		if (window.location.hash == '#logout') {
+			logout()
+		}
+		else if (window.location.hash == '#denied') {
+			loginDenied = true
+			logout()
+		}
+		else if (window.location.hash == '#switch-account') {
+			switchAccount()
+		}
 	}
 
-	if (window.location.hash == '#denied') {
-		loginDenied = true
-		logout()
-	}
-
-	if (window.location.hash == '#switch-account') {
-		switchAccount()
-	}
+	window.addEventListener('hashchange', checkLocationHash)
+	checkLocationHash()
 
 	async function getApiData() {
 		try {
