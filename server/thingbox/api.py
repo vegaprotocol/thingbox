@@ -196,6 +196,7 @@ def get_items(session: UserSession=Depends(user_is_authenticated)):
 def post_item(item: Item, batch: Optional[str] = None, close_batch: Optional[bool] = True, session: UserSession=Depends(api_token_is_admin_token)):
 	if batch is None: batch = db.create_or_check_batch(admin=session.admin_id, batch=batch)
 	if not batch: raise HTTPException(status_code=400, detail='error creating batch, is user an admin?')
+	if not db.get_template(item.template): db.add_template(item.template, 'New template')
 	res = db.add_item(**{ **item.dict(), **dict(batch=batch) })
 	if close_batch: db.close_batch(batch)
 	return { **dict(batch=batch, success=res), **(dict(error=f'error creating item, ensure template exists: {item.template}') if not res else {}) }

@@ -1,6 +1,7 @@
 import click
 import sys
 import json
+import csv as csv_lib
 
 from thingbox import client
 
@@ -73,8 +74,9 @@ def add_item(server, auth_token, target_user, template, category, data, data_fil
 @click.option('--target-id', required=False, default=None, help='Set/override target user ID for all items')
 @click.option('--category', required=False, default=None, help='Set/override category for all items')
 @click.option('--template', required=False, default=None, help='Set/override template for all items')
+@click.option('--csv', required=False, default=False, is_flag=True, help='Process file in CSV format rather than JSON')
 @click.option('-g', '--global-data', required=False, default=[], nargs=2, multiple=True, help="Inject data all items, e.g. -g key value")
-@click.argument('items_file', type=click.File('rb'), required=True, default=sys.stdin)
+@click.argument('items_file', type=click.File('r'), required=True, default=sys.stdin)
 def import_items(
 		server, 
 		auth_token, 
@@ -86,11 +88,15 @@ def import_items(
 		target_id, 
 		category,
 		template,
+		csv,
 		global_data,
 		items_file,
 		send):
 	global_data = { k: v for k, v in global_data }
-	items = json.load(items_file)
+	if csv:
+		items = list(csv_lib.DictReader(items_file))
+	else:
+		items = json.load(items_file)
 	try:
 		client.add_items(
 			server_base_url=server, 
