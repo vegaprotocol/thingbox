@@ -2,6 +2,7 @@ import json
 from os import urandom, environ
 from dataclasses import dataclass
 from typing import List, Optional
+from datetime import datetime
 
 import tweepy
 import chevron
@@ -17,10 +18,17 @@ from fastapi.staticfiles import StaticFiles
 from thingbox import __version__ as version
 from thingbox.db import DB, BackupConfig
 
+TEMPLATE_GLOBALS = { 
+	'include': lambda template_id, render: render(db.get_site_content(template_id).get(template_id, f'<mark>«Missing: {template_id}»</mark>')),
+	'amount': lambda x, _: f'{int(x) / 10 ** 18:.2f}',
+	'iso_date': lambda x, _: datetime.fromisoformat(x).strftime('%-d %B %Y'),
+	'unix_date': lambda x, _: datetime.fromtimestamp(x).strftime('%-d %B %Y')
+}
+
 
 class Config(BaseSettings):
 	app_title: str
-	app_base_url: str
+	app_base_url: str,
 	api_base_url: str
 	twitter_api_key: str
 	twitter_api_secret: str
@@ -182,9 +190,7 @@ def get_items(session: UserSession=Depends(user_is_authenticated)):
 	items = []
 	for r in filter(lambda r: r is not None, result):
 		try:
-			items.append(chevron.render(template=get_template_cached(r['template_id']), data={ **json.loads(r['data']), **{
-				'include': lambda text, render: db.get_site_content(text).get(text, f'<Missing: {text}>')
-			}}))
+			items.append(chevron.render(template=get_template_cached(r['template_id']), data={ **json.loads(r['data']), **TEMPLATE_GLOBALS}))
 		except Exception as e:
 			print(f'Template error rendering item {r["id"]} in template: {r["template_id"]}')
 			print(e)
