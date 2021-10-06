@@ -24,6 +24,7 @@ pre, code {
 details pre {
 	padding: 0;
 	border: none;
+  white-space: pre-wrap;
 }
 article {
 	margin-top: 2rem;
