@@ -106,7 +106,7 @@
 <main>
 	<header>
 		<nav>
-			<h1>{@html $content['site-title']}</h1>
+			{@html md.render($content['site-title'])}
 			{#if screenName} 
 				<p>	
 					<a on:click|preventDefault={logout} href="#logout">Log out @{screenName}</a> / <a href="#switch-account">change account</a>
