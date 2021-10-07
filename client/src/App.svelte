@@ -9,8 +9,8 @@
 	let authUrl
 	let screenName = localStorage.getItem('screen_name')
 	let isAdminUser
+	let adminIsEditor
 	let inAdminMode
-	let serverPublicKey
 	let adminToken
 	let loginDenied
 	let templates = null
@@ -33,7 +33,7 @@
 
 	async function getApiData() {
 		try {
-			({ screenName, admin: isAdminUser } = await api.getUser())
+			({ screenName, admin: isAdminUser, editor: adminIsEditor } = await api.getUser())
 			if (isAdminUser && window.location.hash === '#admin') {
 				inAdminMode = true
 			}
@@ -130,7 +130,7 @@
 	{:else if items !== undefined && !inAdminMode}
 		<Itemlist {items} />
 	{:else if items !== undefined && inAdminMode}
-		<Admin {adminToken} {generateAdminToken} {clearTemplateCache} {templates} updateTemplate={api.updateTemplate} checkUserItems={api.checkUserItems} />
+		<Admin {adminIsEditor} {adminToken} {generateAdminToken} {clearTemplateCache} {templates} updateTemplate={api.updateTemplate} checkUserItems={api.checkUserItems} />
 	{/if}
 	<footer><section>{@html md.render($content['site-footer'])}</section></footer>
 </main>

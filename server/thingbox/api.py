@@ -192,7 +192,8 @@ def get_items(session: UserSession=Depends(user_is_authenticated)):
 	return JSONResponse(dict(
 		screen_name=session.user.screen_name, 
 		id=session.user.id_str,
-		admin=db.is_admin(user_type='twitter', user_id=session.user.id_str)))
+		admin=db.is_admin(user_type='twitter', user_id=session.user.id_str),
+		editor=db.is_editor(user_type='twitter', user_id=session.user.id_str)))
 
 
 @app.get('/items')
