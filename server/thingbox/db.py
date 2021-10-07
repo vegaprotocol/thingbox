@@ -22,7 +22,7 @@ class BackupConfig:
 
 
 DEFAULT_SITE_TEMPLATES = {
-	'site-title': 'My thingbox instance',
+	'site-title': '# My thingbox instance',
 	'site-footer': '&copy; 2021 SuperEvilMegaCorp, your soul belongs to us now. (change me)',
 	'site-home-logged-out': 'Login with Twitter to view your items.',
 	'site-home-empty': '## No items.',
@@ -235,6 +235,21 @@ class DB:
 		rows = res.fetchall()
 		decrypted_rows = [{ 'data': self.decrypt_data(r['data']), 'template_id': r['template_id'], 'id': r['id'] } for r in rows]
 		return list(filter(lambda x: x['data'] is not None, decrypted_rows))
+
+	def get_items_summary(self, target_type, target_id):
+		with self._db as sql:
+			res = sql.execute("""
+				SELECT 
+					id, category, template_id, batch_id, created, archived FROM items 
+				WHERE
+					target_type = :target_type 
+					AND target_id = :target_id
+					AND archived = FALSE
+				ORDER BY
+					created DESC
+			""", dict(target_type=target_type, target_id=target_id))
+		rows = res.fetchall()
+		return list(rows)
 
 	def get_template(self, template, type='item'):
 		with self._db as sql:

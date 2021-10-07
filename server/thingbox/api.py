@@ -265,5 +265,15 @@ def get_site_content(id: List[str] = Query([])):
 def get_site_content(id: str):
 	return db.get_site_content_multi(ids=[id])
 
+@app.get('/check/{target_type}/{target_id}')
+def check_items(target_type: str, target_id: str, session: UserSession=Depends(authenticated_user_is_admin)):
+	if target_type == 'twitter' and not target_id.isdigit():
+		try:
+			[user] = session.api.lookup_users(screen_names=[target_id])
+			target_id = user.id_str
+		except Exception:
+			return []
+	return db.get_items_summary(target_type=target_type, target_id=target_id)
+
 if config.static_files_path:
 	app.mount("/", StaticFiles(directory=config.static_files_path, html=True), name="static")

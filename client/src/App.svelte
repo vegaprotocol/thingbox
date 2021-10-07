@@ -130,7 +130,7 @@
 	{:else if items !== undefined && !inAdminMode}
 		<Itemlist {items} />
 	{:else if items !== undefined && inAdminMode}
-		<Admin {serverPublicKey} {adminToken} {generateAdminToken} {clearTemplateCache} {templates} updateTemplate={api.updateTemplate} />
+		<Admin {adminToken} {generateAdminToken} {clearTemplateCache} {templates} updateTemplate={api.updateTemplate} checkUserItems={api.checkUserItems} />
 	{/if}
 	<footer><section>{@html md.render($content['site-footer'])}</section></footer>
 </main>

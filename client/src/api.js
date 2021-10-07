@@ -80,6 +80,12 @@ async function getContent(ids) {
 	return content
 }
 
+async function checkUserItems(userId) {
+	const res = await callAuthed(window.location.origin + '/check/twitter/' + userId)
+	const items = await res.json()
+	return items
+}
+
 async function logout() {
 	localStorage.removeItem('api_token')
 }
@@ -96,4 +102,5 @@ export default {
 	getTemplates,
 	updateTemplate,
 	getContent,
+	checkUserItems
 }
