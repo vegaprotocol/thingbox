@@ -38,7 +38,7 @@
 			if (isAdminUser && window.location.hash === '#admin') {
 				inAdminMode = true
 			}
-			if (isAdminUser) {
+			if (adminIsEditor) {
 				templates = await api.getTemplates()
 			}
 			if (screenName) {
