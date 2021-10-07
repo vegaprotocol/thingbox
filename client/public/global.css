@@ -18,6 +18,9 @@ footer p {
 main {
 	padding-bottom: 4rem;
 }
+input {
+	font-size: 16px;
+}
 pre, code {
 	color: #2a2;
 }
