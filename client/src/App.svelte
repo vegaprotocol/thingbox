@@ -4,6 +4,7 @@
 	import { content } from './content.js'
 	import Itemlist from './ItemList.svelte'
 	import Admin from './Admin.svelte'
+	import UserCheck from './UserCheck.svelte'
 
 	let items
 	let authUrl
@@ -130,7 +131,11 @@
 	{:else if items !== undefined && !inAdminMode}
 		<Itemlist {items} />
 	{:else if items !== undefined && inAdminMode}
-		<Admin {adminIsEditor} {adminToken} {generateAdminToken} {clearTemplateCache} {templates} updateTemplate={api.updateTemplate} checkUserItems={api.checkUserItems} />
+		<h2>Admin tools</h2>
+		<UserCheck checkUserItems={api.checkUserItems} />
+		{#if adminIsEditor}
+			<Admin {adminToken} {generateAdminToken} {clearTemplateCache} {templates} updateTemplate={api.updateTemplate} />
+		{/if}
 	{/if}
 	<footer><section>{@html md.render($content['site-footer'])}</section></footer>
 </main>
