@@ -78,7 +78,7 @@ import { append_hydration, trusted } from "svelte/internal";
 	<p>Enter a user ID or screen name below to check what items are stored for that user.</p>
 	<p><input bind:value={checkUserId}>&nbsp;<button on:click={doCheck}>Check items</button></p>
 	{#each checkResults as lr}
-		<pre>{JSON.stringify(lr)}</pre>
+		<pre>{typeof lr === 'string' ? lr : JSON.stringify(lr)}</pre>
 	{/each}
 	<h3>Admin API token</h3>
 	<p>Using the API to manage items requires an authentication token which can be generated here. For security, these generally have a short lifespan. </p>
