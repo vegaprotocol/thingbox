@@ -284,6 +284,7 @@ def get_site_content(id: str):
 def check_items(target_type: str, target_id: str, session: UserSession=Depends(authenticated_user_is_admin)):
 	if target_type == 'twitter' and not target_id.isdigit():
 		try:
+			if target_id[0] == '@': target_id = target_id[1:]
 			[user] = session.api.lookup_users(screen_names=[target_id])
 			target_id = user.id_str
 		except Exception:
