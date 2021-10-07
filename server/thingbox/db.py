@@ -59,7 +59,8 @@ class DB:
 					id INTEGER PRIMARY KEY AUTOINCREMENT, 
 					user_type TEXT NOT NULL, 
 					user_id TEXT NOT NULL, 
-					active BOOLEAN NOT NULL,
+					editor BOOLEAN NOT NULL DEFAULT FALSE,
+					active BOOLEAN NOT NULL DEFAULT TRUE,
 					UNIQUE (user_type, user_id)
 				)
 			""")
@@ -138,6 +139,20 @@ class DB:
 				WHERE 
 					user_type = :user_type 
 					AND user_id = :user_id 
+					AND active = TRUE
+			""", dict(user_type=user_type, user_id=user_id))
+			row = res.fetchone()
+			return row and row['id']
+		
+	def is_editor(self, user_type, user_id):
+		with self._db as sql:
+			res = sql.execute("""
+				SELECT 
+					id FROM admins 
+				WHERE 
+					user_type = :user_type 
+					AND user_id = :user_id 
+					AND editor = TRUE
 					AND active = TRUE
 			""", dict(user_type=user_type, user_id=user_id))
 			row = res.fetchone()

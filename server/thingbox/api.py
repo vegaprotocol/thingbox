@@ -137,6 +137,14 @@ def user_is_authenticated(token: str=Depends(auth_scheme)):
 		raise HTTPException(status_code=401)
 
 
+def authenticated_user_is_editor(session: UserSession=Depends(user_is_authenticated)):
+	if (admin_id := db.is_editor(user_type='twitter', user_id=session.user.id_str)):
+		session.admin_id = admin_id
+		return session
+	else:
+		raise HTTPException(status_code=403)
+
+
 def authenticated_user_is_admin(session: UserSession=Depends(user_is_authenticated)):
 	if (admin_id := db.is_admin(user_type='twitter', user_id=session.user.id_str)):
 		session.admin_id = admin_id
@@ -217,14 +225,14 @@ def get_public_key():
 
 
 @app.get('/clear-template-cache')
-def clear_template_cache(session: UserSession=Depends(authenticated_user_is_admin)):
+def clear_template_cache(session: UserSession=Depends(authenticated_user_is_editor)):
 	num_cleared = len(template_cache)
 	template_cache.clear()
 	return dict(cleared=num_cleared)
 
 
 @app.get('/admin-token')
-def get_admin_token(session: UserSession=Depends(authenticated_user_is_admin)):
+def get_admin_token(session: UserSession=Depends(authenticated_user_is_editor)):
 	if session.admin_token in admin_tokens: del admin_tokens[session.admin_token]
 	token = make_token()
 	session.admin_token = token
@@ -233,37 +241,43 @@ def get_admin_token(session: UserSession=Depends(authenticated_user_is_admin)):
 
 
 @app.get('/templates')
-def get_templates(session: UserSession=Depends(authenticated_user_is_admin)):
+def get_templates(session: UserSession=Depends(authenticated_user_is_editor)):
 	return db.get_templates()
 
+
 @app.get('/templates/{template_id}')
-def get_template(template_id, session: UserSession=Depends(authenticated_user_is_admin)):
+def get_template(template_id, session: UserSession=Depends(authenticated_user_is_editor)):
 	if (res := db.get_template(template=template_id)) == None:
 		raise HTTPException(status_code=404, detail=f'No template with id {template_id}')
 	else:
 		return res
 
+
 @app.post('/templates/{template_id}')
-def create_template(template_id, content: str = Body(default=None), session: UserSession=Depends(authenticated_user_is_admin)):
+def create_template(template_id, content: str = Body(default=None), session: UserSession=Depends(authenticated_user_is_editor)):
 	if content is None: raise HTTPException(status_code=400, detail='Template content required in request body')
 	success = db.add_template(template_id=template_id, content=content)
 	if success: template_cache.clear()
 	return dict(success=success)
 
+
 @app.put('/templates/{template_id}')
-def update_template(template_id, type: str = 'item', content: str = Body(default=None), session: UserSession=Depends(authenticated_user_is_admin)):
+def update_template(template_id, type: str = 'item', content: str = Body(default=None), session: UserSession=Depends(authenticated_user_is_editor)):
 	if content is None: raise HTTPException(status_code=400, detail='Template content required in request body')
 	success = db.update_template(template_id=template_id, content=content, type=type)
 	if success: template_cache.clear()
 	return dict(success=success)
 
+
 @app.get('/content')
 def get_site_content(id: List[str] = Query([])):
 	return db.get_site_content_multi(ids=id)
 
+
 @app.get('/content/{id}')
 def get_site_content(id: str):
 	return db.get_site_content_multi(ids=[id])
+
 
 @app.get('/check/{target_type}/{target_id}')
 def check_items(target_type: str, target_id: str, session: UserSession=Depends(authenticated_user_is_admin)):
@@ -274,6 +288,7 @@ def check_items(target_type: str, target_id: str, session: UserSession=Depends(a
 		except Exception:
 			return []
 	return db.get_items_summary(target_type=target_type, target_id=target_id)
+
 
 if config.static_files_path:
 	app.mount("/", StaticFiles(directory=config.static_files_path, html=True), name="static")

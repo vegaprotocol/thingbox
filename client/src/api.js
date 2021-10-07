@@ -46,7 +46,7 @@ async function getPublicKey() {
 
 async function getUser() {
 	const res = await callAuthed(window.location.origin + '/user')
-	const { screen_name: screenName, id, admin } = await res.json()
+	const { screen_name: screenName, id, admin, editor } = await res.json()
 	return { screenName, id, admin }
 }
 
