@@ -86,7 +86,7 @@ async function checkUserItems(userId) {
 		const items = await res.json()
 		return items
 	} catch(e) {
-		return [e]
+		return ['Error checking items: ' + e.toString()]
 	}
 }
 
