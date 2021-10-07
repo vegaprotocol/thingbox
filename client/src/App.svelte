@@ -39,6 +39,7 @@
 				inAdminMode = true
 			}
 			if (adminIsEditor) {
+				console.log('editor');
 				templates = await api.getTemplates()
 			}
 			if (screenName) {
