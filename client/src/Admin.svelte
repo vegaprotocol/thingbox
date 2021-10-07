@@ -17,7 +17,7 @@ import { append_hydration, trusted } from "svelte/internal";
 		checkResults = ['Querying items for: ' + checkUserId]
 		checkResults = await checkUserItems(checkUserId)
 		if (checkResults.length === 0) {
-			checkResults = ['<span class="warning">No items for: ' + checkUserId + '</span>']
+			checkResults = ['No items for: ' + checkUserId]
 		}
 	}
 
