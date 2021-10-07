@@ -76,7 +76,7 @@ import { append_hydration, trusted } from "svelte/internal";
 	<h2>Admin tools</h2>
 	<h3>Item check</h3>
 	<p>Enter a user ID or screen name below to check what items are stored for that user.</p>
-	<p><input bind:value={checkUserId}>&nbsp;<button on:click={doCheck}>Check items</button></p>
+	<p><input bind:value={checkUserId}>&nbsp;&nbsp;<button on:click={doCheck}>Check items</button></p>
 	{#each checkResults as lr}
 		<pre>{typeof lr === 'string' ? lr : JSON.stringify(lr)}</pre>
 	{/each}
