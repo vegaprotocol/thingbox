@@ -1,6 +1,9 @@
 body {
 	padding: 1rem !important;
 }
+header {
+	padding-bottom: 1rem;
+}
 footer {
 	position: fixed;
 	bottom: 0;
