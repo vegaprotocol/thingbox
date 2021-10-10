@@ -1,5 +1,6 @@
 body {
-	padding: 1rem !important;
+	padding-left: 1rem !important;
+	padding-right: 1rem !important;
 }
 header {
 	padding-bottom: 1rem;
