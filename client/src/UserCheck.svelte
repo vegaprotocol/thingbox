@@ -19,7 +19,7 @@
 <section>
 	<h3>Item check</h3>
 	<p>Enter a user ID or screen name below to check what items are stored for that user.</p>
-	<form><p><input bind:this={checkUserInput} bind:value={checkUserId}>&nbsp;&nbsp;<button type="submit" on:click|preventDefault={doCheck}>Check items</button></p></form>
+	<form><p><input bind:this={checkUserInput} bind:value={checkUserId}>&nbsp;&nbsp;<button type="submit" on:click|preventDefault={doCheck}>Check</button></p></form>
 	{#each checkResults as lr}
 		{#if typeof lr === 'string' }
 			<pre>{lr}</pre>
