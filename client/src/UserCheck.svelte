@@ -26,7 +26,7 @@
 		{:else}
 			<details>
 				<summary>{lr.category} <span style="font-weight: normal;">(added {lr.created})</span></summary>
-				<pre>{JSON.stringify(lr, 2)}</pre>
+				<pre>{JSON.stringify(lr)}</pre>
 			</details>
 		{/if}
 	{/each}
