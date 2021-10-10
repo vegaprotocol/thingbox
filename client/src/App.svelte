@@ -74,7 +74,7 @@
 	async function toggleAdminMode() {
 		inAdminMode = !inAdminMode
 		window.location.hash = inAdminMode ? '#admin' : '#'
-		if (inAdminMode && templates === null) {
+		if (inAdminMode && adminIsEditor && templates === null) {
 			templates = await api.getTemplates() 
 		}
 	}
