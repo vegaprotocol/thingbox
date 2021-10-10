@@ -20,6 +20,7 @@ main {
 }
 input {
 	font-size: 16px;
+	padding: 6px 8px;
 }
 pre, code {
 	color: #2a2;
