@@ -6,6 +6,7 @@
 	let	checkUserInput
 	
 	async function doCheck() {
+		if (checkUserId.trim() === '') return
 		checkResults = ['Querying items for: ' + checkUserId]
 		checkResults = await checkUserItems(checkUserId)
 		if (checkResults.length === 0) {
@@ -19,7 +20,7 @@
 <section>
 	<h3>Item check</h3>
 	<p>Enter a user ID or screen name to check what items are stored for that user.</p>
-	<form><p><input bind:this={checkUserInput} bind:value={checkUserId}>&nbsp;&nbsp;<button type="submit" on:click|preventDefault={doCheck}>Check</button></p></form>
+	<form><p><input bind:this={checkUserInput} bind:value={checkUserId} on:focus={()=>checkUserInput.select()}>&nbsp;&nbsp;<button type="submit" on:click|preventDefault={doCheck}>Check</button></p></form>
 	{#each checkResults as lr}
 		{#if typeof lr === 'string' }
 			<pre>{lr}</pre>
