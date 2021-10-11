@@ -81,13 +81,9 @@ async function getContent(ids) {
 }
 
 async function checkUserItems(userId) {
-	try {
-		const res = await callAuthed(window.location.origin + '/check/twitter/' + userId)
-		const items = await res.json()
-		return items
-	} catch(e) {
-		return ['Error checking items: ' + e.toString()]
-	}
+	const res = await callAuthed(window.location.origin + '/check/twitter/' + userId)
+	const items = await res.json()
+	return items
 }
 
 async function logout() {

@@ -8,9 +8,14 @@
 	async function doCheck() {
 		if (checkUserId.trim() === '') return
 		checkResults = ['Querying items for: ' + checkUserId]
-		checkResults = await checkUserItems(checkUserId)
-		if (checkResults.filter(x => typeof x !== 'string').length === 0) {
-			checkResults.push('No items for: ' + checkUserId)
+		try {
+			checkResults = await checkUserItems(checkUserId)
+			if (checkResults.filter(x => typeof x !== 'string').length === 0) {
+				checkResults.push('No results for: ' + checkUserId)
+			}
+		} 
+		catch(e) {
+			checkResults = ['Error checking items: ' + e.toString()]
 		}
 		checkUserInput.focus()
 		checkUserInput.select()
