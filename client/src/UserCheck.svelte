@@ -10,7 +10,7 @@
 		checkResults = ['Querying items for: ' + checkUserId]
 		checkResults = await checkUserItems(checkUserId)
 		if (checkResults.filter(x => typeof x !== 'string').length === 0) {
-			checkResults.push(['No items for: ' + checkUserId])
+			checkResults.push('No items for: ' + checkUserId)
 		}
 		checkUserInput.focus()
 		checkUserInput.select()
