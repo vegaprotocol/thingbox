@@ -291,7 +291,8 @@ def check_items(target_type: str, target_id: str, session: UserSession=Depends(a
 			target_id = user.id_str
 		except Exception:
 			return result
-	return result + db.get_items_summary(target_type=target_type, target_id=target_id)
+	items = db.get_items_summary(target_type=target_type, target_id=target_id)
+	return result + (items if len(items) > 0 else [f'No results for user: {target_type}/{target_id}'])
 
 
 if config.static_files_path:

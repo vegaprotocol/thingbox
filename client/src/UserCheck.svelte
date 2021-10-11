@@ -10,9 +10,6 @@
 		checkResults = ['Querying items for: ' + checkUserId]
 		try {
 			checkResults = await checkUserItems(checkUserId)
-			if (checkResults.filter(x => typeof x !== 'string').length === 0) {
-				checkResults.push('No results for: ' + checkUserId)
-			}
 		} 
 		catch(e) {
 			checkResults = ['Error checking items: ' + e.toString()]
