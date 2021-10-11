@@ -303,7 +303,11 @@ class DB:
 		with self._db as sql:
 			res = sql.execute("""
 				SELECT
-					id, content, type FROM templates
+					id, content, type 
+				FROM 
+					templates
+				ORDER BY
+					type, id
 			""")
 		rows = res.fetchall()
 		return list(rows)
