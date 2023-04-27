@@ -127,6 +127,8 @@
 			{@html md.render($content['site-home-logged-out'])}
 			{#if authUrl}
 				<p>👉 <a href={authUrl}>Connect my Twitter account</a></p>
+			{:else}
+				<p>😿 Server failed to initialise authentication. Contact an admin.</p>
 			{/if}
 		</section>
 	{:else if items !== undefined && !inAdminMode}
