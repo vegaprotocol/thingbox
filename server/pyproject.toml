@@ -5,7 +5,7 @@ description = ""
 authors = ["Barney Mannerings <b.mannerings@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "~3.9"
 fastapi = "^0.68.1"
 pydantic = {extras = ["dotenv"], version = "^1.8.2"}
 tweepy = "^3.10.0"
